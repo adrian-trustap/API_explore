@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>API Tree Viewer</title>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <style>
+    body {
+      font-family: sans-serif;
+      margin: 0;
+      overflow: hidden;
+    }
+
+    .node circle {
+      fill: #555;
+    }
+
+    .node text {
+      font-size: 12px;
+    }
+
+    .link {
+      fill: none;
+      stroke: #999;
+      stroke-opacity: 0.6;
+      stroke-width: 1.5px;
+    }
+  </style>
+</head>
+<body>
+  <svg width="100%" height="100%"></svg>
+
+  <script>
+    const svg = d3.select("svg");
+    const g = svg.append("g");
+
+    const zoom = d3.zoom().on("zoom", (event) => {
+      g.attr("transform", event.transform);
+    });
+    svg.call(zoom);
+
+    d3.json("tree.json").then(data => {
+      const root = d3.hierarchy(data);
+      root.x0 = 0;
+      root.y0 = 0;
+
+      const dx = 20;
+      const dy = 200;
+      const tree = d3.tree().nodeSize([dx, dy]);
+
+      const diagonal = d3.linkHorizontal()
+        .x(d => d.y)
+        .y(d => d.x);
+
+      const treeData = tree(root);
+
+      const nodes = treeData.descendants();
+      const links = treeData.links();
+
+      const height = Math.max(500, nodes.length * dx * 1.5);
+      svg.attr("viewBox", [-dy / 3, -dx, window.innerWidth, height]);
+
+      // links
+      g.append("g")
+        .selectAll("path")
+        .data(links)
+        .join("path")
+        .attr("class", "link")
+        .attr("d", diagonal);
+
+      // nodes
+      const node = g.append("g")
+        .selectAll("g")
+        .data(nodes)
+        .join("g")
+        .attr("class", "node")
+        .attr("transform", d => `translate(${d.y},${d.x})`);
+
+      node.append("circle")
+        .attr("r", 4);
+
+      node.append("text")
+        .attr("dy", "0.31em")
+        .attr("x", d => d.children ? -8 : 8)
+        .attr("text-anchor", d => d.children ? "end" : "start")
+        .text(d => d.data.name)
+        .clone(true).lower()
+        .attr("stroke", "white");
+    });
+  </script>
+</body>
+</html>
