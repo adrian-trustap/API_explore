@@ -2,6 +2,46 @@ import json
 from collections import defaultdict
 import sys
 import yaml  # add this
+from collections import Counter, defaultdict
+
+def find_duplicate_endpoint_names(spec):
+    """
+    Find duplicates based only on the final path segment (endpoint name).
+    """
+    counter = defaultdict(list)  # name -> list of (path, method)
+
+    for path, methods in spec.get('paths', {}).items():
+        endpoint_name = path.strip('/').split('/')[-1]
+        for method in methods.keys():
+            counter[endpoint_name].append((path, method.upper()))
+
+    duplicates = {name: entries for name, entries in counter.items() if len(entries) > 1}
+    return duplicates
+
+
+def snake_case_tag_path_prefix_stats(spec, max_depth=3):
+    tag_prefix_counts = defaultdict(lambda: defaultdict(Counter))
+
+    for path, methods in spec.get('paths', {}).items():
+        for method, details in methods.items():
+            if not isinstance(details, dict):
+                continue
+            tags = details.get('tags', [])
+            if not tags:
+                continue
+
+            # Clean path and split on underscores
+            path_parts = path.strip('/').split('/')
+            last_segment = path_parts[-1] if path_parts else ''
+            snake_parts = [p for p in last_segment.split('_') if p]
+
+            for tag in tags:
+                for i in range(1, max_depth + 1):
+                    if len(snake_parts) >= i:
+                        prefix = '_'.join(snake_parts[:i])
+                        tag_prefix_counts[tag][i][prefix] += 1
+
+    return tag_prefix_counts
 
 class TreeNode:
     def __init__(self, name):
@@ -125,6 +165,39 @@ def main(swagger_path):
     output_path = 'tree.json'
     save_as_json(swagger_path, output_path)
     save_tag_grouped_tree(spec)
+
+    tag_prefix_counts = snake_case_tag_path_prefix_stats(spec, max_depth=3)
+
+    print("\nMost common snake_case path prefixes per tag:")
+    for tag, levels in tag_prefix_counts.items():
+        print(f"\nTag: {tag}")
+        for depth in sorted(levels.keys()):
+            print(f"  Depth {depth}:")
+            for prefix, count in levels[depth].most_common(5):
+                print(f"    {prefix}: {count}")
+
+    # Optional: save to file
+    with open('tag_path_prefix_stats.json', 'w') as f:
+        # Convert nested defaultdicts to regular dicts
+        output = {
+            tag: {
+                str(depth): dict(prefixes)
+                for depth, prefixes in levels.items()
+            }
+            for tag, levels in tag_prefix_counts.items()
+        }
+        json.dump(output, f, indent=2)
+        print("\nSaved tag path prefix stats to tag_path_prefix_stats.json")
+
+    duplicates = find_duplicate_endpoint_names(spec)
+    if duplicates:
+        print("\nDuplicate endpoint names found:")
+        for name, occurrences in duplicates.items():
+            print(f"  {name}  - occurs {len(occurrences)} times")
+            for path, method in occurrences:
+                print(f"    {method} {path}")
+    else:
+        print("\nNo duplicate endpoint names found.")
 
 
 
