@@ -142,67 +142,31 @@ def to_d3_json(node):
 
 def save_as_json(swagger_path, output_path='tree.json'):
     with open(swagger_path, 'r') as f:
-        if swagger_path.endswith('.yaml') or swagger_path.endswith('.yml'):
+        if swagger_path.endswith(('.yaml', '.yml')):
             spec = yaml.safe_load(f)
         else:
             spec = json.load(f)
     tree = build_tree(spec)
     tree_json = to_d3_json(tree)
-    save_tag_grouped_tree(spec)
+    save_tag_grouped_tree(spec, output_path.replace('.json', '_grouped.json'))
     with open(output_path, 'w') as f:
         json.dump(tree_json, f, indent=2)
     print(f"Tree JSON saved to {output_path}")
 
-def main(swagger_path):
-    with open(swagger_path, 'r') as f:
-        if swagger_path.endswith('.yaml') or swagger_path.endswith('.yml'):
-            spec = yaml.safe_load(f)
-        else:
-            spec = json.load(f)
-    tree = build_tree(spec)
-    print("\nAPI Endpoint Tree:")
-    tree.display()
-    output_path = 'tree.json'
-    save_as_json(swagger_path, output_path)
-    save_tag_grouped_tree(spec)
+def main(before_path, after_path):
+    # BEFORE
+    print("\n=== BEFORE SPEC ===")
+    save_as_json(before_path, "tree_before.json")
 
-    tag_prefix_counts = snake_case_tag_path_prefix_stats(spec, max_depth=3)
+    # AFTER
+    print("\n=== AFTER SPEC ===")
+    save_as_json(after_path, "tree_after.json")
 
-    print("\nMost common snake_case path prefixes per tag:")
-    for tag, levels in tag_prefix_counts.items():
-        print(f"\nTag: {tag}")
-        for depth in sorted(levels.keys()):
-            print(f"  Depth {depth}:")
-            for prefix, count in levels[depth].most_common(5):
-                print(f"    {prefix}: {count}")
-
-    # Optional: save to file
-    with open('tag_path_prefix_stats.json', 'w') as f:
-        # Convert nested defaultdicts to regular dicts
-        output = {
-            tag: {
-                str(depth): dict(prefixes)
-                for depth, prefixes in levels.items()
-            }
-            for tag, levels in tag_prefix_counts.items()
-        }
-        json.dump(output, f, indent=2)
-        print("\nSaved tag path prefix stats to tag_path_prefix_stats.json")
-
-    duplicates = find_duplicate_endpoint_names(spec)
-    if duplicates:
-        print("\nDuplicate endpoint names found:")
-        for name, occurrences in duplicates.items():
-            print(f"  {name}  - occurs {len(occurrences)} times")
-            for path, method in occurrences:
-                print(f"    {method} {path}")
-    else:
-        print("\nNo duplicate endpoint names found.")
-
+    print("\nNow open index.html to toggle between the two views.")
 
 
 if __name__ == '__main__':
-    if len(sys.argv) < 2:
-        print("Usage: python api_tree.py path/to/swagger.json")
+    if len(sys.argv) < 3:
+        print("Usage: python api_tree.py before.json after.json")
     else:
-        main(sys.argv[1])
+        main(sys.argv[1], sys.argv[2])

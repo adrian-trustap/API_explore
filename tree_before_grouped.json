@@ -1,0 +1,1052 @@
+{
+  "name": "API",
+  "children": [
+    {
+      "name": "Users",
+      "children": [
+        {
+          "name": "Buyers and Sellers",
+          "children": [
+            {
+              "name": "/guest_users [POST]",
+              "children": null
+            },
+            {
+              "name": "/me",
+              "children": [
+                {
+                  "name": "/balances [GET]",
+                  "children": null
+                },
+                {
+                  "name": "/features [GET]",
+                  "children": [
+                    {
+                      "name": "/instant_payouts [POST]",
+                      "children": null
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Clients",
+          "children": [
+            {
+              "name": "/client",
+              "children": [
+                {
+                  "name": "/supported_registration_countries [GET]",
+                  "children": null
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Personal",
+          "children": [
+            {
+              "name": "/me",
+              "children": [
+                {
+                  "name": "/account_session [GET]",
+                  "children": null
+                },
+                {
+                  "name": "/debit_account [GET, POST]",
+                  "children": null
+                },
+                {
+                  "name": "/instant_payout_balance [GET]",
+                  "children": null
+                },
+                {
+                  "name": "/payout_attempts [GET]",
+                  "children": null
+                },
+                {
+                  "name": "/personal",
+                  "children": [
+                    {
+                      "name": "/additional_identity_document",
+                      "children": [
+                        {
+                          "name": "/verification_status [GET]",
+                          "children": null
+                        }
+                      ]
+                    },
+                    {
+                      "name": "/additional_identity_document_back",
+                      "children": [
+                        {
+                          "name": "/verification_status [GET]",
+                          "children": null
+                        }
+                      ]
+                    },
+                    {
+                      "name": "/details [GET, PATCH]",
+                      "children": null
+                    },
+                    {
+                      "name": "/identity_document",
+                      "children": [
+                        {
+                          "name": "/verification_status [GET]",
+                          "children": null
+                        }
+                      ]
+                    },
+                    {
+                      "name": "/identity_document_back",
+                      "children": [
+                        {
+                          "name": "/verification_status [GET]",
+                          "children": null
+                        }
+                      ]
+                    },
+                    {
+                      "name": "/stripe_publishable_key [GET]",
+                      "children": null
+                    }
+                  ]
+                },
+                {
+                  "name": "/profile",
+                  "children": [
+                    {
+                      "name": "/payout_status [GET]",
+                      "children": null
+                    }
+                  ]
+                },
+                {
+                  "name": "/stripe_financial_connections",
+                  "children": [
+                    {
+                      "name": "/add_account [POST]",
+                      "children": null
+                    },
+                    {
+                      "name": "/ownership [GET]",
+                      "children": null
+                    },
+                    {
+                      "name": "/prepare_account [POST]",
+                      "children": null
+                    }
+                  ]
+                },
+                {
+                  "name": "/verification_method [GET]",
+                  "children": null
+                },
+                {
+                  "name": "/verification_session [GET]",
+                  "children": null
+                },
+                {
+                  "name": "/verification_session_native [GET]",
+                  "children": null
+                },
+                {
+                  "name": "/verification_status [GET]",
+                  "children": null
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Online transactions",
+      "children": [
+        {
+          "name": "Online Transactions",
+          "children": [
+            {
+              "name": "/batch",
+              "children": [
+                {
+                  "name": "/transactions [GET]",
+                  "children": null
+                }
+              ]
+            },
+            {
+              "name": "/me",
+              "children": [
+                {
+                  "name": "/transactions [GET, POST]",
+                  "children": [
+                    {
+                      "name": "/create_and_join [POST]",
+                      "children": null
+                    },
+                    {
+                      "name": "/create_with_guest_user [POST]",
+                      "children": null
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "/transactions [GET, PUT]",
+              "children": [
+                {
+                  "name": "/{transaction_id} [GET]",
+                  "children": [
+                    {
+                      "name": "/accept_listing_transaction [POST]",
+                      "children": null
+                    },
+                    {
+                      "name": "/claim_for_buyer [POST]",
+                      "children": null
+                    },
+                    {
+                      "name": "/claim_for_seller [POST]",
+                      "children": null
+                    },
+                    {
+                      "name": "/submit_order_issue [POST]",
+                      "children": null
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "/transactions-by-join-code",
+              "children": [
+                {
+                  "name": "/{join_code}",
+                  "children": [
+                    {
+                      "name": "/reject [POST]",
+                      "children": null
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "/transactions_by_claim_secret",
+              "children": [
+                {
+                  "name": "/{secret}",
+                  "children": [
+                    {
+                      "name": "/claim_as_buyer [POST]",
+                      "children": null
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Online Payment",
+          "children": [
+            {
+              "name": "/charge [GET]",
+              "children": null
+            },
+            {
+              "name": "/transactions",
+              "children": [
+                {
+                  "name": "/{transaction_id} [PATCH]",
+                  "children": [
+                    {
+                      "name": "/accept_payment [POST]",
+                      "children": null
+                    },
+                    {
+                      "name": "/accept_payment_with_guest_seller [POST]",
+                      "children": null
+                    },
+                    {
+                      "name": "/bank_transfer_details [GET]",
+                      "children": null
+                    },
+                    {
+                      "name": "/charge [GET]",
+                      "children": null
+                    },
+                    {
+                      "name": "/pay_with_balance [POST]",
+                      "children": null
+                    },
+                    {
+                      "name": "/set_payment_method [POST]",
+                      "children": null
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Online Shipping",
+          "children": [
+            {
+              "name": "/me",
+              "children": [
+                {
+                  "name": "/carriers",
+                  "children": [
+                    {
+                      "name": "/{carrier_id}",
+                      "children": [
+                        {
+                          "name": "/facilities [GET]",
+                          "children": null
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "/shippo_shipping_rates [POST]",
+              "children": null
+            },
+            {
+              "name": "/supported_carriers [GET]",
+              "children": null
+            },
+            {
+              "name": "/transactions",
+              "children": [
+                {
+                  "name": "/{transaction_id}",
+                  "children": [
+                    {
+                      "name": "/confirm_delivery [POST]",
+                      "children": null
+                    },
+                    {
+                      "name": "/confirm_delivery_with_guest_buyer [POST]",
+                      "children": null
+                    },
+                    {
+                      "name": "/delivery_point [POST]",
+                      "children": null
+                    },
+                    {
+                      "name": "/extend_tracking_deadline [POST]",
+                      "children": null
+                    },
+                    {
+                      "name": "/generate_shipment_label [POST]",
+                      "children": null
+                    },
+                    {
+                      "name": "/pick_up_point [POST]",
+                      "children": null
+                    },
+                    {
+                      "name": "/shipping_details [GET, POST]",
+                      "children": null
+                    },
+                    {
+                      "name": "/shippo_address [POST]",
+                      "children": null
+                    },
+                    {
+                      "name": "/shippo_customs_declaration [POST]",
+                      "children": null
+                    },
+                    {
+                      "name": "/shippo_parcel_details [POST]",
+                      "children": null
+                    },
+                    {
+                      "name": "/shippo_shipping_label [GET]",
+                      "children": null
+                    },
+                    {
+                      "name": "/shippo_shipping_rate [POST]",
+                      "children": null
+                    },
+                    {
+                      "name": "/shippo_shipping_rates [GET]",
+                      "children": null
+                    },
+                    {
+                      "name": "/track [POST]",
+                      "children": null
+                    },
+                    {
+                      "name": "/track_with_guest_seller [POST]",
+                      "children": null
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Online Complaint",
+          "children": [
+            {
+              "name": "/transactions",
+              "children": [
+                {
+                  "name": "/{transaction_id}",
+                  "children": [
+                    {
+                      "name": "/accept_complaint [POST]",
+                      "children": null
+                    },
+                    {
+                      "name": "/complain_with_description [POST]",
+                      "children": null
+                    },
+                    {
+                      "name": "/complain_with_guest_buyer [POST]",
+                      "children": null
+                    },
+                    {
+                      "name": "/end_complaint_period [POST]",
+                      "children": null
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Online Cancel",
+          "children": [
+            {
+              "name": "/transactions",
+              "children": [
+                {
+                  "name": "/{transaction_id}",
+                  "children": [
+                    {
+                      "name": "/cancel [POST]",
+                      "children": null
+                    },
+                    {
+                      "name": "/cancel_with_guest_user [POST]",
+                      "children": null
+                    },
+                    {
+                      "name": "/reject_listing_transaction [POST]",
+                      "children": null
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Online Buyer/Seller Details",
+          "children": [
+            {
+              "name": "/transactions",
+              "children": [
+                {
+                  "name": "/{transaction_id}",
+                  "children": [
+                    {
+                      "name": "/buyer_details [GET]",
+                      "children": null
+                    },
+                    {
+                      "name": "/seller_details [GET]",
+                      "children": null
+                    },
+                    {
+                      "name": "/stripe_client_secret [GET]",
+                      "children": null
+                    },
+                    {
+                      "name": "/stripe_publishable_key [GET]",
+                      "children": null
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Face-to-face transactions",
+      "children": [
+        {
+          "name": "F2F Transactions",
+          "children": [
+            {
+              "name": "/p2p",
+              "children": [
+                {
+                  "name": "/batch",
+                  "children": [
+                    {
+                      "name": "/transactions [GET]",
+                      "children": null
+                    }
+                  ]
+                },
+                {
+                  "name": "/me",
+                  "children": [
+                    {
+                      "name": "/transactions [GET, POST]",
+                      "children": [
+                        {
+                          "name": "/create_and_join [POST]",
+                          "children": null
+                        },
+                        {
+                          "name": "/create_with_guest_user [POST]",
+                          "children": null
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "name": "/transactions",
+                  "children": [
+                    {
+                      "name": "/{transaction_id} [GET]",
+                      "children": [
+                        {
+                          "name": "/claim_for_seller [POST]",
+                          "children": null
+                        },
+                        {
+                          "name": "/join_with_guest [POST]",
+                          "children": null
+                        },
+                        {
+                          "name": "/metadata [GET, POST]",
+                          "children": null
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "name": "/transactions_by_claim_secret",
+                  "children": [
+                    {
+                      "name": "/{secret}",
+                      "children": [
+                        {
+                          "name": "/claim_as_buyer [POST]",
+                          "children": null
+                        },
+                        {
+                          "name": "/claim_as_seller [POST]",
+                          "children": null
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "name": "/transactions_by_join_code",
+                  "children": [
+                    {
+                      "name": "/{joinCode} [GET]",
+                      "children": [
+                        {
+                          "name": "/join [POST]",
+                          "children": null
+                        },
+                        {
+                          "name": "/reject [POST]",
+                          "children": null
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "F2F Payment",
+          "children": [
+            {
+              "name": "/p2p",
+              "children": [
+                {
+                  "name": "/charge [GET]",
+                  "children": null
+                },
+                {
+                  "name": "/transactions",
+                  "children": [
+                    {
+                      "name": "/{transaction_id} [PATCH]",
+                      "children": [
+                        {
+                          "name": "/accept_deposit_with_guest_seller [POST]",
+                          "children": null
+                        },
+                        {
+                          "name": "/bank_transfer_details [GET]",
+                          "children": null
+                        },
+                        {
+                          "name": "/pay_deposit_with_balance [POST]",
+                          "children": null
+                        },
+                        {
+                          "name": "/pay_remainder_with_balance [POST]",
+                          "children": null
+                        },
+                        {
+                          "name": "/set_deposit_payment_method [POST]",
+                          "children": null
+                        }
+                      ]
+                    },
+                    {
+                      "name": "/{transactionId}",
+                      "children": [
+                        {
+                          "name": "/accept_deposit [POST]",
+                          "children": null
+                        },
+                        {
+                          "name": "/set_price [POST]",
+                          "children": null
+                        },
+                        {
+                          "name": "/skip_remainder [POST]",
+                          "children": null
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "F2F Handover",
+          "children": [
+            {
+              "name": "/p2p",
+              "children": [
+                {
+                  "name": "/transactions",
+                  "children": [
+                    {
+                      "name": "/{transaction_id}",
+                      "children": [
+                        {
+                          "name": "/confirm_handover [POST]",
+                          "children": null
+                        }
+                      ]
+                    },
+                    {
+                      "name": "/{transactionId}",
+                      "children": [
+                        {
+                          "name": "/confirm_handover_with_guest_user [POST]",
+                          "children": null
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "F2F Complaint",
+          "children": [
+            {
+              "name": "/p2p",
+              "children": [
+                {
+                  "name": "/transactions",
+                  "children": [
+                    {
+                      "name": "/{transaction_id}",
+                      "children": [
+                        {
+                          "name": "/accept_complaint [POST]",
+                          "children": null
+                        },
+                        {
+                          "name": "/complain [POST]",
+                          "children": null
+                        },
+                        {
+                          "name": "/complain_with_guest_buyer [POST]",
+                          "children": null
+                        },
+                        {
+                          "name": "/end_complaint_period_with_guest_buyer [POST]",
+                          "children": null
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "F2F Cancel",
+          "children": [
+            {
+              "name": "/p2p",
+              "children": [
+                {
+                  "name": "/transactions",
+                  "children": [
+                    {
+                      "name": "/{transaction_id}",
+                      "children": [
+                        {
+                          "name": "/cancel_with_description [POST]",
+                          "children": null
+                        },
+                        {
+                          "name": "/cancel_with_description_with_guest_user [POST]",
+                          "children": null
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "F2F Buyer/Seller Details",
+          "children": [
+            {
+              "name": "/p2p",
+              "children": [
+                {
+                  "name": "/transactions",
+                  "children": [
+                    {
+                      "name": "/{transaction_id}",
+                      "children": [
+                        {
+                          "name": "/remainder_stripe_client_secret [GET]",
+                          "children": null
+                        },
+                        {
+                          "name": "/stripe_publishable_key [GET]",
+                          "children": null
+                        }
+                      ]
+                    },
+                    {
+                      "name": "/{transactionId}",
+                      "children": [
+                        {
+                          "name": "/buyer_details [GET]",
+                          "children": null
+                        },
+                        {
+                          "name": "/deposit_stripe_client_secret [GET]",
+                          "children": null
+                        },
+                        {
+                          "name": "/seller_details [GET]",
+                          "children": null
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Notifications",
+      "children": [
+        {
+          "name": "Notifications",
+          "children": [
+            {
+              "name": "/me",
+              "children": [
+                {
+                  "name": "/notifications [GET]",
+                  "children": null
+                }
+              ]
+            },
+            {
+              "name": "/notifications",
+              "children": [
+                {
+                  "name": "/{notification_id} [GET]",
+                  "children": [
+                    {
+                      "name": "/mark_as_read [POST]",
+                      "children": null
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Deprecated endpoints",
+      "children": [
+        {
+          "name": "Online Multi-use Listings",
+          "children": [
+            {
+              "name": "/me",
+              "children": [
+                {
+                  "name": "/multi_use_listings",
+                  "children": [
+                    {
+                      "name": "/create [POST]",
+                      "children": null
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "/multi_use_listings",
+              "children": [
+                {
+                  "name": "/{listing_id} [DELETE, GET, PATCH]",
+                  "children": [
+                    {
+                      "name": "/create_transaction [POST]",
+                      "children": null
+                    },
+                    {
+                      "name": "/create_transaction_with_guest_buyer [POST]",
+                      "children": null
+                    },
+                    {
+                      "name": "/disable [POST]",
+                      "children": null
+                    },
+                    {
+                      "name": "/enable [POST]",
+                      "children": null
+                    },
+                    {
+                      "name": "/set_description [POST]",
+                      "children": null
+                    },
+                    {
+                      "name": "/set_pricing [POST]",
+                      "children": null
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Online Single-use Listings",
+          "children": [
+            {
+              "name": "/me",
+              "children": [
+                {
+                  "name": "/single_use_listings",
+                  "children": [
+                    {
+                      "name": "/create [POST]",
+                      "children": null
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "/single_use_listings",
+              "children": [
+                {
+                  "name": "/{listing_id} [DELETE, GET, PATCH]",
+                  "children": [
+                    {
+                      "name": "/create_transaction [POST]",
+                      "children": null
+                    },
+                    {
+                      "name": "/create_transaction_with_guest_buyer [POST]",
+                      "children": null
+                    },
+                    {
+                      "name": "/disable [POST]",
+                      "children": null
+                    },
+                    {
+                      "name": "/enable [POST]",
+                      "children": null
+                    },
+                    {
+                      "name": "/set_description [POST]",
+                      "children": null
+                    },
+                    {
+                      "name": "/set_pricing [POST]",
+                      "children": null
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "F2F Multi-use Listings",
+          "children": [
+            {
+              "name": "/p2p",
+              "children": [
+                {
+                  "name": "/me",
+                  "children": [
+                    {
+                      "name": "/multi_use_listings",
+                      "children": [
+                        {
+                          "name": "/create [POST]",
+                          "children": null
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "name": "/multi_use_listings",
+                  "children": [
+                    {
+                      "name": "/{listingId} [DELETE, GET, PATCH]",
+                      "children": [
+                        {
+                          "name": "/create_transaction [POST]",
+                          "children": null
+                        },
+                        {
+                          "name": "/disable [POST]",
+                          "children": null
+                        },
+                        {
+                          "name": "/enable [POST]",
+                          "children": null
+                        },
+                        {
+                          "name": "/set_deposit_pricing [POST]",
+                          "children": null
+                        },
+                        {
+                          "name": "/set_description [POST]",
+                          "children": null
+                        },
+                        {
+                          "name": "/set_skip_remainder [POST]",
+                          "children": null
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "F2F Single-use Listings",
+          "children": [
+            {
+              "name": "/p2p",
+              "children": [
+                {
+                  "name": "/me",
+                  "children": [
+                    {
+                      "name": "/single_use_listings",
+                      "children": [
+                        {
+                          "name": "/create [POST]",
+                          "children": null
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "name": "/single_use_listings",
+                  "children": [
+                    {
+                      "name": "/{listingId} [DELETE, GET, PATCH]",
+                      "children": [
+                        {
+                          "name": "/create_transaction [POST]",
+                          "children": null
+                        },
+                        {
+                          "name": "/disable [POST]",
+                          "children": null
+                        },
+                        {
+                          "name": "/enable [POST]",
+                          "children": null
+                        },
+                        {
+                          "name": "/set_deposit_pricing [POST]",
+                          "children": null
+                        },
+                        {
+                          "name": "/set_description [POST]",
+                          "children": null
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
