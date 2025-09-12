@@ -6,7 +6,7 @@ Demo:
 
 * To build the project, use the following command:
 ```
-python3 api_tree.py ../api_docs_portal/apis/openapi.yaml
+python3 api_tree.py ./re_before/openapi_before.yaml re_after/openapi_after.yaml
 ```
 * To serve locally, use the following command:
 ```

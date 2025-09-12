@@ -2,19 +2,6 @@
   "name": "/",
   "children": [
     {
-      "name": "/batch",
-      "children": [
-        {
-          "name": "/transactions [GET]",
-          "children": null
-        }
-      ]
-    },
-    {
-      "name": "/charge [GET]",
-      "children": null
-    },
-    {
       "name": "/client",
       "children": [
         {
@@ -148,19 +135,6 @@
             },
             {
               "name": "/prepare_account [POST]",
-              "children": null
-            }
-          ]
-        },
-        {
-          "name": "/transactions [GET, POST]",
-          "children": [
-            {
-              "name": "/create_and_join [POST]",
-              "children": null
-            },
-            {
-              "name": "/create_with_guest_user [POST]",
               "children": null
             }
           ]
@@ -389,63 +363,11 @@
       "children": null
     },
     {
-      "name": "/transactions [GET, PUT]",
+      "name": "/transactions",
       "children": [
         {
-          "name": "/{transaction_id} [GET, PATCH]",
+          "name": "/{transaction_id}",
           "children": [
-            {
-              "name": "/accept_complaint [POST]",
-              "children": null
-            },
-            {
-              "name": "/accept_listing_transaction [POST]",
-              "children": null
-            },
-            {
-              "name": "/accept_payment [POST]",
-              "children": null
-            },
-            {
-              "name": "/accept_payment_with_guest_seller [POST]",
-              "children": null
-            },
-            {
-              "name": "/bank_transfer_details [GET]",
-              "children": null
-            },
-            {
-              "name": "/buyer_details [GET]",
-              "children": null
-            },
-            {
-              "name": "/cancel [POST]",
-              "children": null
-            },
-            {
-              "name": "/cancel_with_guest_user [POST]",
-              "children": null
-            },
-            {
-              "name": "/charge [GET]",
-              "children": null
-            },
-            {
-              "name": "/claim_for_buyer [POST]",
-              "children": null
-            },
-            {
-              "name": "/claim_for_seller [POST]",
-              "children": null
-            },
-            {
-              "name": "/complain_with_description [POST]",
-              "children": null
-            },
-            {
-              "name": "/complain_with_guest_buyer [POST]",
-              "children": null
-            },
             {
               "name": "/confirm_delivery [POST]",
               "children": null
@@ -459,10 +381,6 @@
               "children": null
             },
             {
-              "name": "/end_complaint_period [POST]",
-              "children": null
-            },
-            {
               "name": "/extend_tracking_deadline [POST]",
               "children": null
             },
@@ -471,23 +389,7 @@
               "children": null
             },
             {
-              "name": "/pay_with_balance [POST]",
-              "children": null
-            },
-            {
               "name": "/pick_up_point [POST]",
-              "children": null
-            },
-            {
-              "name": "/reject_listing_transaction [POST]",
-              "children": null
-            },
-            {
-              "name": "/seller_details [GET]",
-              "children": null
-            },
-            {
-              "name": "/set_payment_method [POST]",
               "children": null
             },
             {
@@ -519,51 +421,11 @@
               "children": null
             },
             {
-              "name": "/stripe_client_secret [GET]",
-              "children": null
-            },
-            {
-              "name": "/stripe_publishable_key [GET]",
-              "children": null
-            },
-            {
-              "name": "/submit_order_issue [POST]",
-              "children": null
-            },
-            {
               "name": "/track [POST]",
               "children": null
             },
             {
               "name": "/track_with_guest_seller [POST]",
-              "children": null
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "name": "/transactions-by-join-code",
-      "children": [
-        {
-          "name": "/{join_code}",
-          "children": [
-            {
-              "name": "/reject [POST]",
-              "children": null
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "name": "/transactions_by_claim_secret",
-      "children": [
-        {
-          "name": "/{secret}",
-          "children": [
-            {
-              "name": "/claim_as_buyer [POST]",
               "children": null
             }
           ]
