@@ -1,172 +1,146 @@
+"""
+api_tree.py
+
+Builds a tree.json file for the D3 API tree viewer.
+
+Two modes:
+
+1. Plain mode (one spec):
+     python api_tree.py v2-spec.yaml
+   Produces a plain endpoint tree - no highlighting, no diff data.
+
+2. Diff mode (two specs):
+     python api_tree.py v1-spec.yaml --compare v2-spec.yaml
+   Produces the same tree, but every endpoint (and every method on that
+   endpoint) is tagged with a status:
+     - "added"     endpoint/method exists only in the second (v2) spec
+     - "removed"   endpoint/method exists only in the first (v1) spec
+     - "unchanged" endpoint/method exists in both, methods identical
+     - "modified"  endpoint exists in both, but its set of methods differs
+
+The output JSON is consumed by the accompanying HTML viewer.
+"""
+import argparse
 import json
-from collections import defaultdict
 import sys
-import yaml  # add this
-from collections import Counter, defaultdict
 
-def find_duplicate_endpoint_names(spec):
-    """
-    Find duplicates based only on the final path segment (endpoint name).
-    """
-    counter = defaultdict(list)  # name -> list of (path, method)
+import yaml
 
-    for path, methods in spec.get('paths', {}).items():
-        endpoint_name = path.strip('/').split('/')[-1]
-        for method in methods.keys():
-            counter[endpoint_name].append((path, method.upper()))
+HTTP_METHODS = {'get', 'post', 'put', 'delete', 'patch', 'options', 'head'}
 
-    duplicates = {name: entries for name, entries in counter.items() if len(entries) > 1}
-    return duplicates
-
-
-def snake_case_tag_path_prefix_stats(spec, max_depth=3):
-    tag_prefix_counts = defaultdict(lambda: defaultdict(Counter))
-
-    for path, methods in spec.get('paths', {}).items():
-        for method, details in methods.items():
-            if not isinstance(details, dict):
-                continue
-            tags = details.get('tags', [])
-            if not tags:
-                continue
-
-            # Clean path and split on underscores
-            path_parts = path.strip('/').split('/')
-            last_segment = path_parts[-1] if path_parts else ''
-            snake_parts = [p for p in last_segment.split('_') if p]
-
-            for tag in tags:
-                for i in range(1, max_depth + 1):
-                    if len(snake_parts) >= i:
-                        prefix = '_'.join(snake_parts[:i])
-                        tag_prefix_counts[tag][i][prefix] += 1
-
-    return tag_prefix_counts
 
 class TreeNode:
     def __init__(self, name):
         self.name = name
-        self.methods = set()
+        self.methods_v1 = set()
+        self.methods_v2 = set()
         self.children = {}
 
-    def add_path(self, path_parts, method):
+    def add_path(self, path_parts, method, version):
         if not path_parts:
-            self.methods.add(method.upper())
+            if version == 1:
+                self.methods_v1.add(method.upper())
+            else:
+                self.methods_v2.add(method.upper())
             return
         head, *tail = path_parts
-        if head not in self.children:
-            self.children[head] = TreeNode(head)
-        self.children[head].add_path(tail, method)
-
-    def display(self, indent=0):
-        indent_str = '  ' * indent
-        methods = f" [{', '.join(sorted(self.methods))}]" if self.methods else ""
-        print(f"{indent_str}/{self.name}{methods}")
-        for child in sorted(self.children.values(), key=lambda x: x.name):
-            child.display(indent + 1)
-
-def build_tree(swagger_spec):
-    root = TreeNode('')
-    paths = swagger_spec.get('paths', {})
-    for path, methods in paths.items():
-        path_parts = [part for part in path.strip('/').split('/') if part]
-        for method in methods.keys():
-            if method.lower() in ['get', 'post', 'put', 'delete', 'patch', 'options', 'head']:
-                root.add_path(path_parts, method)
-    return root
+        child = self.children.setdefault(head, TreeNode(head))
+        child.add_path(tail, method, version)
 
 
-def collect_tagged_paths(spec):
-    tag_to_paths = defaultdict(list)
+def load_spec(path):
+    with open(path, 'r') as f:
+        if path.endswith(('.yaml', '.yml')):
+            return yaml.safe_load(f)
+        return json.load(f)
+
+
+def build_tree(spec, version, root=None):
+    """Walk a spec's paths into `root`, tagging methods with `version` (1 or 2)."""
+    if root is None:
+        root = TreeNode('')
     for path, methods in spec.get('paths', {}).items():
-        for method, details in methods.items():
-            if not isinstance(details, dict):
-                continue
-            tags = details.get('tags', [])
-            for tag in tags:
-                tag_to_paths[tag].append((path, method.upper()))
-    return tag_to_paths
-
-def build_tree_for_tag(paths_and_methods):
-    root = TreeNode('')
-    for path, method in paths_and_methods:
-        parts = path.strip('/').split('/')
-        current = root
-        for part in parts:
-            current = current.children.setdefault(part, TreeNode(part))  # ← fixed line
-        current.methods.add(method)
+        if not isinstance(methods, dict):
+            continue
+        parts = [p for p in path.strip('/').split('/') if p]
+        for method in methods.keys():
+            if method.lower() in HTTP_METHODS:
+                root.add_path(parts, method, version)
     return root
 
-def tag_tree_to_d3(tag, tree):
-    return {
-        "name": tag,
-        "children": [to_d3_json(child) for child in tree.children.values()]
-    }
 
-def save_tag_grouped_tree(spec, output_path='tree.json'):
-    tag_to_paths = collect_tagged_paths(spec)
-    tag_groups = spec.get('x-tagGroups', [])
-    
-    grouped_tree = []
-
-    for group in tag_groups:
-        group_name = group.get('name', 'Other')
-        tag_entries = group.get('tags', [])
-        group_entry = {
-            "name": group_name,
-            "children": []
-        }
-        for tag in tag_entries:
-            paths = tag_to_paths.get(tag, [])
-            tag_tree = build_tree_for_tag(paths)
-            group_entry["children"].append(tag_tree_to_d3(tag, tag_tree))
-        grouped_tree.append(group_entry)
-
-    with open(output_path, 'w') as f:
-        json.dump({"name": "API", "children": grouped_tree}, f, indent=2)
-
-    print(f"Grouped tree saved to {output_path}")
+def endpoint_status(methods_v1, methods_v2):
+    if not methods_v1 and methods_v2:
+        return "added"
+    if methods_v1 and not methods_v2:
+        return "removed"
+    if methods_v1 == methods_v2:
+        return "unchanged"
+    return "modified"
 
 
-
-
-def to_d3_json(node):
-    children = [to_d3_json(child) for child in node.children.values()]
-    label = f"/{node.name}" if node.name else "/"
-    if node.methods:
-        label += f" [{', '.join(sorted(node.methods))}]"
-    return {
-        "name": label,
-        "children": children if children else None
-    }
-
-def save_as_json(swagger_path, output_path='tree.json'):
-    with open(swagger_path, 'r') as f:
-        if swagger_path.endswith(('.yaml', '.yml')):
-            spec = yaml.safe_load(f)
+def method_list(methods_v1, methods_v2, diff_mode):
+    all_methods = sorted(methods_v1 | methods_v2)
+    out = []
+    for m in all_methods:
+        if not diff_mode:
+            status = "unchanged"
+        elif m in methods_v1 and m in methods_v2:
+            status = "unchanged"
+        elif m in methods_v2:
+            status = "added"
         else:
-            spec = json.load(f)
-    tree = build_tree(spec)
-    tree_json = to_d3_json(tree)
-    save_tag_grouped_tree(spec, output_path.replace('.json', '_grouped.json'))
-    with open(output_path, 'w') as f:
+            status = "removed"
+        out.append({"method": m, "status": status})
+    return out
+
+
+def to_d3_json(node, diff_mode):
+    children = [to_d3_json(c, diff_mode) for c in sorted(node.children.values(), key=lambda n: n.name)]
+    label = f"/{node.name}" if node.name else "/"
+    result = {"name": label}
+
+    has_methods = bool(node.methods_v1 or node.methods_v2)
+    if has_methods:
+        result["methods"] = method_list(node.methods_v1, node.methods_v2, diff_mode)
+        if diff_mode:
+            result["status"] = endpoint_status(node.methods_v1, node.methods_v2)
+
+    if children:
+        result["children"] = children
+    return result
+
+
+def main():
+    parser = argparse.ArgumentParser(description="Build tree.json for the API tree viewer.")
+    parser.add_argument('spec', help='Path to the API spec (the v1/base spec if using --compare).')
+    parser.add_argument('--compare', '-c', metavar='SPEC_V2',
+                         help='Path to a second spec to diff against `spec`. Enables diff mode.')
+    parser.add_argument('--output', '-o', default='tree.json', help='Output JSON path (default: tree.json).')
+    args = parser.parse_args()
+
+    root = TreeNode('')
+    build_tree(load_spec(args.spec), 1, root)
+
+    diff_mode = bool(args.compare)
+    if diff_mode:
+        build_tree(load_spec(args.compare), 2, root)
+
+    tree_json = to_d3_json(root, diff_mode)
+
+    with open(args.output, 'w') as f:
         json.dump(tree_json, f, indent=2)
-    print(f"Tree JSON saved to {output_path}")
 
-def main(before_path, after_path):
-    # BEFORE
-    print("\n=== BEFORE SPEC ===")
-    save_as_json(before_path, "tree_before.json")
-
-    # AFTER
-    print("\n=== AFTER SPEC ===")
-    save_as_json(after_path, "tree_after.json")
-
-    print("\nNow open index.html to toggle between the two views.")
+    if diff_mode:
+        print(f"Diff tree ({args.spec} -> {args.compare}) saved to {args.output}")
+    else:
+        print(f"Endpoint tree saved to {args.output}")
 
 
 if __name__ == '__main__':
-    if len(sys.argv) < 3:
-        print("Usage: python api_tree.py before.json after.json")
-    else:
-        main(sys.argv[1], sys.argv[2])
+    if len(sys.argv) < 2:
+        print("Usage:")
+        print("  python api_tree.py path/to/spec.yaml")
+        print("  python api_tree.py path/to/v1-spec.yaml --compare path/to/v2-spec.yaml")
+        sys.exit(1)
+    main()

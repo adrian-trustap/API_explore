@@ -1,0 +1,1990 @@
+openapi: 3.0.0
+info:
+  contact:
+    email: support@trustap.com
+  description: >
+    The Trustap API is a REST-based API for managing user data and
+
+    transactions for Trustap users.
+
+
+    Note that, like Stripe, all API `price` and `charge` fields expect
+
+    amounts to be provided in a currency's smallest unit. See [the Stripe
+
+    documentation](https://stripe.com/docs/currencies#zero-decimal) for more
+
+    details.
+
+
+    API Keys
+
+    --------
+
+
+    Some endpoints such as `/charge` endpoints can be accessed directly
+
+    using an API key. API keys are provided as the "username" portion of a
+
+    basic auth authentication. For example, the Trustap fee for a 
+
+    transaction can be determined using the following cURL request with an
+
+    API key:
+
+
+    ``` bash
+
+    curl -i -X GET -u '<API_KEY>:'​ 'https://api.test.trustap.com/v2/fees?currency=usd&amount=896'
+
+    ```
+
+
+    Deprecation
+
+    -----------
+
+
+    Deprecated endpoints are tagged with the word `DEPRECATED` at the start
+
+    of their description. The deprecation message will describe what
+
+    endpoints/approach should be used instead.
+
+
+    Note that deprecated endpoints will not be removed from the current
+
+    version of the API, but their use is discouraged. Furthermore, migrating
+
+    to later major versions of the API will be made easier by avoiding
+
+    deprecated endpoints.
+
+
+    Production
+
+    ----------
+
+
+    This documentation references the staging environment of the Trustap
+
+    API, which is available at `https://api.test.trustap.com` and uses the
+
+    `trustap-stage` realm during authentication. This environment can be
+
+    used for implementing and testing features using test credit cards, bank
+
+    accounts, etc.
+
+
+    When all features using Trustap have been implemented and tested
+
+    sufficiently, the production environment of the Trustap API can be used
+
+    to process actual currency. This environment is available at
+
+    `https://api.trustap.com` and uses the `trustap` realm during
+
+    authentication.
+
+
+    Note that only your client ID will be the same in the staging and
+
+    production Trustap API environments; your client secret and API key will
+
+    be different in the two environments.
+  title: Trustap API
+  version: 2.0.1
+paths:
+  /v2/carriers:
+    get:
+      description: |
+        This returns the carriers that are currently supported for
+        automated tracking. The carrier `name`
+        should be shown to users but the `code` should be submitted to
+        the `/track` endpoint when submitting tracking details.
+        Likewise, when showing a transaction to the user, the `carrier`
+        field stored with the transaction should be used to index these
+        carriers and show the human-readable name of the carrier to the
+        user, if this index is found.
+      operationId: v2_transactions.getSupportedCarriers
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: "#/components/schemas/v2_transactions.Carrier"
+                type: array
+      summary: Get the supported carriers
+      tags:
+        - Shipping
+      x-toc-endpoint:
+        context: v2_carriers
+        meta:
+          log_req_body: true
+          log_resp_body: true
+          require_active_country: false
+  /v2/fees:
+    get:
+      description: |
+        This returns the Trustap fee, in the `currency`'s smallest unit,
+        for a transaction involving goods with the supplied `amount`. See
+        [the Stripe
+        documentation](https://stripe.com/docs/currencies#zero-decimal)
+        for more details.
+      operationId: v2_transactions.getFees
+      parameters:
+        - description: |
+            The currency that the `amount` is specified in.
+          in: query
+          name: currency
+          required: true
+          schema:
+            type: string
+            format: currency
+        - description: |
+            The price of the goods being sold in this transaction, in
+            the `currency`'s smallest unit. For example, if a trading
+            card is being sold for $12.34 (with `currency` as `usd`),
+            then the request for the fees for this transaction would
+            be `/v2/fees?amount=1234&currency=usd`.
+          in: query
+          name: amount
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - description: |
+            Represents an additional charge to be paid by the buyer added
+            to the transaction total. Use this field to include costs like
+            processing fees or local taxes.
+            Must be an integer provided in the smallest unit of the currency
+            (for example, 500 for $5.00 USD). Defaults to 0 if not provided.
+          in: query
+          name: amount_extra
+          required: false
+          schema:
+            type: integer
+            format: int64
+        - description: >
+            Represents an additional charge to be paid by the buyer, seller or
+            client.
+
+            Use this field to include costs like shipping surcharges.
+
+            Must be an integer provided in the smallest unit of the currency
+
+            (for example, 500 for $5.00 USD).
+          in: query
+          name: amount_postage
+          required: false
+          schema:
+            type: integer
+            format: int64
+        - description: |
+            The payment method that will be used to pay for the
+            transaction. This is necessary because different payment
+            methods may result in different fees.
+            Supports `card` and `bank_transfer`.
+
+            The default value is `card`.
+          in: query
+          name: payment_method
+          required: false
+          schema:
+            type: string
+        - description: |
+            The fee config for which the fees are computed.
+          in: query
+          name: fees_config
+          required: false
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/v2_transactions.Fees"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                example:
+                  code: negative_amount
+                  message: "`amount` cannot be negative"
+                properties:
+                  code:
+                    description: |
+                      * `unsupported_combination`: The provided payment method,
+                      fee config and currency combination isn't supported.
+                    enum:
+                      - currency_missing
+                      - invalid_amount
+                      - negative_amount
+                      - amount_too_low
+                      - unsupported_currency
+                      - invalid_fee_config
+                      - unsupported_combination
+                    type: string
+                  message:
+                    type: string
+                required:
+                  - code
+                  - message
+                type: object
+      summary: Get the Trustap fee for a transaction
+      tags:
+        - Payment
+      x-toc-endpoint:
+        context: p2p_optional_user
+        meta:
+          log_req_body: true
+          log_resp_body: true
+          require_active_country: false
+  /v2/guest_users:
+    post:
+      description: >
+        This endpoint creates a new guest user which can be used as the buyer or
+
+        the seller in a transaction. Guest users can be used to create transactions
+
+        for users that don't yet have login details, or who choose not to use the
+
+        logged-in user for creating the new transaction. Emails are sent to guest
+
+        users which will contain details for adding guest transactions to their
+
+        logged-in profile.
+      operationId: v2_users.createGuestUser
+      requestBody:
+        content:
+          application/json:
+            schema:
+              example:
+                country_code: IE
+                email: guest@test.com
+                first_name: Test
+                last_name: User
+                tos_acceptance:
+                  ip: 192.168.1.2
+                  unix_timestamp: 1672531200
+              properties:
+                country_code:
+                  type: string
+                email:
+                  minLength: 1
+                  type: string
+                first_name:
+                  minLength: 1
+                  type: string
+                last_name:
+                  minLength: 1
+                  type: string
+                tos_acceptance:
+                  $ref: "#/components/schemas/v2_users.TosAcceptance"
+              required:
+                - email
+                - country_code
+                - tos_acceptance
+              type: object
+        required: true
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/v2_users.User"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                properties:
+                  code:
+                    enum:
+                      - invalid_email
+                      - missing_country_code
+                      - missing_tos_acceptance
+                      - invalid_tos_acceptance_date
+                      - invalid_country_code
+                    type: string
+                  message:
+                    type: string
+                required:
+                  - code
+                  - message
+                type: object
+      security:
+        - APIKey: []
+      summary: Create a new guest user
+      tags:
+        - Buyers and Sellers
+      x-toc-endpoint:
+        context: users_client_access
+        meta:
+          log_req_body: false
+          log_resp_body: false
+  /v2/transactions:
+    post:
+      description: |
+        Offline access is allowed for this endpoint.
+      operationId: v2_transactions.createTransaction
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                amount:
+                  description: >
+                    The price of the goods being sold in this transaction, in
+
+                    the `currency`'s smallest unit. For example, if a trading
+
+                    card is being sold for $12.34 (with `currency` as `usd`),
+
+                    then the body would contain `{"amount": 1234, "currency": "usd"}`.
+                  format: int64
+                  type: integer
+                amount_extra:
+                  description: >
+                    Represents an additional charge to be paid by the buyer
+                    added
+
+                    to the transaction total. Use this field to include costs like
+
+                    processing fees or local taxes.
+
+                    Must be an integer provided in the smallest unit of the currency
+
+                    (for example, 500 for $5.00 USD). Defaults to 0 if not provided.
+                  format: int64
+                  type: integer
+                amount_postage:
+                  description: >
+                    Represents an additional charge to be paid by the buyer,
+                    seller or client.
+
+                    Use this field to include costs like shipping surcharges.
+
+                    Must be an integer provided in the smallest unit of the currency
+
+                    (for example, 500 for $5.00 USD).
+                  format: int64
+                  type: integer
+                buyer_id:
+                  description: >
+                    The ID of the user that will be the buyer in this
+                    transaction.
+                  type: string
+                contains_shipping:
+                  description: |
+                    Specifies if the transactions contains a shippable item and
+                    the shipping details should be collected from the buyer.
+                  type: boolean
+                currency:
+                  description: |
+                    The currency that the `amount` is specified in.
+                  format: currency
+                  type: string
+                  x-toc-ref: "#/definitions/Currency"
+                description:
+                  description: A description of the goods being sold.
+                  type: string
+                fees_buyer:
+                  description: >
+                    The buyer fees for this transaction, in the `currency`'s
+                    smallest
+
+                    unit.
+                  format: int64
+                  type: integer
+                fees_config:
+                  description: The fee config for which the fees are computed.
+                  format: int64
+                  type: integer
+                fees_seller:
+                  description: >
+                    The seller fees for this transaction, in the `currency`'s
+                    smallest
+
+                    unit.
+                  format: int64
+                  type: integer
+                image_url:
+                  description: >
+                    URL of the image displayed on the Trustap payment page to
+                    show the buyer
+
+                    the item they are paying for.
+
+                    Supports jpg, png, gif, bmp, webp and svg files. Images displayed as a
+
+                    squares. Non-square images are cropped.
+                  format: absolute_url
+                  maxLength: 2047
+                  type: string
+                payment_method:
+                  description: |
+                    The payment method that will be used to pay for the
+                    transaction. This is necessary because different payment
+                    methods may result in different fees.
+                    Supports `card` and `bank_transfer`.
+
+                    The default value is `card`.
+                  type: string
+                role:
+                  description: |
+                    The role of the user creating the transaction.
+                    Supported values are `buyer` and `seller`.
+                  type: string
+                  x-toc-ref: "#/definitions/Role"
+                seller_id:
+                  description: >
+                    The ID of the user that will be the seller in this
+                    transaction.
+                  type: string
+              required:
+                - currency
+                - amount
+                - fees_buyer
+                - description
+              type: object
+        required: true
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/v2_transactions.Transaction"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                example:
+                  code: negative_amount
+                  message: "`price` cannot be negative"
+                properties:
+                  code:
+                    enum:
+                      - invalid_currency
+                      - missing_user_id
+                      - invalid_user_id
+                      - missing_seller_id
+                      - missing_buyer_id
+                      - invalid_seller_id
+                      - invalid_buyer_id
+                      - incorrect_charge
+                      - negative_amount
+                      - amount_too_low
+                      - invalid_charge_config
+                      - missing_role
+                      - invalid_role
+                      - unsupported_role
+                    type: string
+                  message:
+                    type: string
+                required:
+                  - code
+                  - message
+                type: object
+      security:
+        - APIKey: []
+      summary: Create a new transaction
+      tags:
+        - Transactions
+      x-toc-endpoint:
+        context: v2_create_transaction
+        meta:
+          log_req_body: true
+          log_resp_body: true
+          skip_offline_scope_check: true
+  "/v2/transactions/{transaction_id}":
+    get:
+      operationId: v2_transactions.getTransaction
+      parameters:
+        - in: path
+          name: transaction_id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/v2_transactions.Transaction"
+      summary: Get a transaction by its ID
+      tags:
+        - Transactions
+      x-toc-endpoint:
+        context: p2p_open
+        meta:
+          log_req_body: true
+          log_resp_body: true
+          require_active_country: false
+  "/v2/transactions/{transaction_id}/accept_complaint":
+    post:
+      operationId: v2_transactions.acceptComplaintForTransaction
+      parameters:
+        - description: Required in client flows, where you make API calls on behalf of
+            another Trustap user.
+          in: header
+          name: Trustap-User
+          required: false
+          schema:
+            type: string
+        - in: path
+          name: transaction_id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/v2_transactions.Transaction"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                properties:
+                  code:
+                    enum:
+                      - funds_already_released
+                      - deposit_not_paid
+                      - deposit_already_refunded
+                      - not_complained
+                    type: string
+                  message:
+                    type: string
+                required:
+                  - code
+                  - message
+                type: object
+      summary: Accept a complaint for this transaction
+      tags:
+        - Transaction Issues
+      x-toc-endpoint:
+        context: p2p
+        meta:
+          log_req_body: true
+          log_resp_body: true
+          require_active_country: true
+          skip_offline_scope_check: true
+  "/v2/transactions/{transaction_id}/accept_payment":
+    post:
+      operationId: v2_transactions.acceptPaymentForTransaction
+      parameters:
+        - description: Required in client flows, where you make API calls on behalf of
+            another Trustap user.
+          in: header
+          name: Trustap-User
+          required: false
+          schema:
+            type: string
+        - in: path
+          name: transaction_id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/v2_transactions.Transaction"
+      summary: Accept the payment for a transaction
+      tags:
+        - Payment
+      x-toc-endpoint:
+        context: p2p_any_user
+        meta:
+          allow_guest_user: true
+          log_req_body: true
+          log_resp_body: true
+          require_active_country: false
+          skip_offline_scope_check: true
+  "/v2/transactions/{transaction_id}/bank_transfer_details":
+    get:
+      description: >
+        Get the bank transfer details for a transaction with payment method
+        `bank_transfer`.
+      operationId: v2_transactions.getBankTransferDetails
+      parameters:
+        - in: path
+          name: transaction_id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/v2_transactions.BankTransferDetails"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                properties:
+                  code:
+                    enum:
+                      - payment_method_not_bank_transfer
+                      - paid_with_balance
+                    type: string
+                  message:
+                    type: string
+                required:
+                  - code
+                  - message
+                type: object
+      summary: Get the bank transfer details for a transaction
+      tags:
+        - Transactions
+      x-toc-endpoint:
+        context: p2p_open
+        meta:
+          log_req_body: true
+          log_resp_body: true
+          require_active_country: false
+  "/v2/transactions/{transaction_id}/cancel":
+    post:
+      operationId: v2_transactions.cancelTransaction
+      parameters:
+        - description: Required in client flows, where you make API calls on behalf of
+            another Trustap user.
+          in: header
+          name: Trustap-User
+          required: false
+          schema:
+            type: string
+        - in: path
+          name: transaction_id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                description:
+                  description: |
+                    A description of the cancellation reason.
+                  type: string
+              required:
+                - description
+              type: object
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/v2_transactions.Transaction"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                properties:
+                  code:
+                    enum:
+                      - already_cancelled
+                      - handover_already_confirmed
+                    type: string
+                  message:
+                    type: string
+                required:
+                  - code
+                  - message
+                type: object
+      summary: Cancel a transaction
+      tags:
+        - Transactions
+      x-toc-endpoint:
+        context: p2p_any_user
+        meta:
+          allow_guest_user: true
+          log_req_body: true
+          log_resp_body: true
+          require_active_country: false
+          skip_offline_scope_check: true
+  "/v2/transactions/{transaction_id}/claim":
+    post:
+      description: |
+        This endpoint enables a client to claim a transaction on behalf of a
+        Trustap user as a buyer or seller. This endpoint can only be accessed
+        by clients.
+      operationId: v2_transactions.claimTransaction
+      parameters:
+        - description: Required in client flows, where you make API calls on behalf of
+            another Trustap user.
+          in: header
+          name: Trustap-User
+          required: false
+          schema:
+            type: string
+        - in: path
+          name: transaction_id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                role:
+                  description: The role of the user claiming the transaction. Supported values are
+                    `buyer` and `seller`.
+                  type: string
+                  x-toc-ref: "#/definitions/Role"
+              required:
+                - role
+              type: object
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/v2_transactions.Transaction"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                properties:
+                  code:
+                    enum:
+                      - cannot_claim_own_transaction
+                      - invalid_role
+                      - invalid_user_id
+                      - emails_mismatched
+                    type: string
+                  message:
+                    type: string
+                required:
+                  - code
+                  - message
+                type: object
+      security:
+        - APIKey: []
+      summary: Claim a transaction on behalf of a Trustap user
+      tags:
+        - Transactions
+      x-toc-endpoint:
+        context: p2p
+        meta:
+          log_req_body: true
+          log_resp_body: true
+          skip_offline_scope_check: true
+  "/v2/transactions/{transaction_id}/confirm_delivery":
+    post:
+      description: |
+        This endpoint allows the buyer to manually confirm the delivery
+        of the item in the case that the state of the transaction was
+        not updated asynchronously by Trustap
+      operationId: v2_transactions.confirmDeliveryForTransaction
+      parameters:
+        - description: Required in client flows, where you make API calls on behalf of
+            another Trustap user.
+          in: header
+          name: Trustap-User
+          required: false
+          schema:
+            type: string
+        - in: path
+          name: transaction_id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/v2_transactions.Transaction"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                properties:
+                  code:
+                    enum:
+                      - delivery_not_supported
+                      - delivery_already_set
+                      - invalid_id
+                    type: string
+                  message:
+                    type: string
+                required:
+                  - code
+                  - message
+                type: object
+      security:
+        - APIKey: []
+        - OAuth2: []
+      summary: Confirm delivery for this transaction
+      tags:
+        - Shipping
+      x-toc-endpoint:
+        context: p2p_any_user
+        meta:
+          allow_guest_user: true
+          log_req_body: true
+          log_resp_body: true
+  "/v2/transactions/{transaction_id}/confirm_handover":
+    post:
+      operationId: v2_transactions.confirmHandoverForTransaction
+      parameters:
+        - description: Required in client flows, where you make API calls on behalf of
+            another Trustap user.
+          in: header
+          name: Trustap-User
+          required: false
+          schema:
+            type: string
+        - in: path
+          name: transaction_id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/v2_transactions.Transaction"
+      summary: Confirm the handover of goods for a transaction
+      tags:
+        - Handover
+      x-toc-endpoint:
+        context: p2p_any_user
+        meta:
+          allow_guest_user: true
+          log_req_body: true
+          log_resp_body: true
+          require_active_country: false
+          skip_offline_scope_check: true
+  "/v2/transactions/{transaction_id}/end_complaint_period":
+    post:
+      operationId: v2_transactions.endComplaintPeriodForTransaction
+      parameters:
+        - description: Required in client flows, where you make API calls on behalf of
+            another Trustap user.
+          in: header
+          name: Trustap-User
+          required: false
+          schema:
+            type: string
+        - in: path
+          name: transaction_id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/v2_transactions.Transaction"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                properties:
+                  code:
+                    enum:
+                      - complaint_period_expired
+                      - handover_not_confirmed
+                      - funds_already_released
+                    type: string
+                  message:
+                    type: string
+                required:
+                  - code
+                  - message
+                type: object
+      summary: End the complaint period for this transaction
+      tags:
+        - Transaction Issues
+      x-toc-endpoint:
+        context: p2p_any_user
+        meta:
+          allow_guest_user: true
+          log_req_body: true
+          log_resp_body: true
+          require_active_country: false
+          skip_offline_scope_check: true
+  "/v2/transactions/{transaction_id}/metadata":
+    post:
+      operationId: v2_transactions.setTransactionMetadata
+      parameters:
+        - in: path
+          name: transaction_id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              additionalProperties: true
+              type: object
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/v2_transactions.Transaction"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                properties:
+                  code:
+                    enum:
+                      - too_many_keys
+                      - value_too_long
+                      - key_too_long
+                      - empty_json
+                      - unsupported_type
+                    type: string
+                  message:
+                    type: string
+                required:
+                  - code
+                  - message
+                type: object
+      summary: Set metadata for a transaction
+      tags:
+        - Transactions
+      x-toc-endpoint:
+        context: p2p_open
+        meta:
+          log_req_body: true
+          log_resp_body: true
+          require_active_country: false
+  "/v2/transactions/{transaction_id}/shipping_details":
+    get:
+      operationId: v2_transactions.getShippingDetailsForTransaction
+      parameters:
+        - in: path
+          name: transaction_id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/v2_transactions.ShippingDetails"
+      summary: Get the shipping details of the buyer for a transaction
+      tags:
+        - Shipping
+      x-toc-endpoint:
+        context: p2p
+        meta:
+          allow_guest_user: true
+          log_req_body: true
+          log_resp_body: true
+          require_active_country: false
+    post:
+      operationId: v2_transactions.setShippingDetailsForTransaction
+      parameters:
+        - in: path
+          name: transaction_id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                address_line_1:
+                  type: string
+                address_line_2:
+                  type: string
+                city:
+                  type: string
+                country:
+                  minLength: 1
+                  type: string
+                name:
+                  minLength: 1
+                  type: string
+                phone:
+                  type: string
+                postal_code:
+                  type: string
+                state:
+                  type: string
+              required:
+                - name
+                - country
+              type: object
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/v2_transactions.ShippingDetails"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                properties:
+                  code:
+                    enum:
+                      - empty_name
+                      - empty_country
+                    type: string
+                  message:
+                    type: string
+                required:
+                  - code
+                  - message
+                type: object
+      summary: Post the shipping details of the buyer for a transaction
+      tags:
+        - Shipping
+      x-toc-endpoint:
+        context: p2p
+        meta:
+          allow_guest_user: true
+          log_req_body: true
+          log_resp_body: true
+          require_active_country: false
+          skip_offline_scope_check: true
+  "/v2/transactions/{transaction_id}/submit_complaint":
+    post:
+      description: |
+        A complaint is submitted for problems with transactions after the order
+        has been shipped or handover has been confirmed. Before that an order
+        issue should be submitted instead.
+      operationId: v2_transactions.submitComplaintForTransaction
+      parameters:
+        - description: Required in client flows, where you make API calls on behalf of
+            another Trustap user.
+          in: header
+          name: Trustap-User
+          required: false
+          schema:
+            type: string
+        - in: path
+          name: transaction_id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                category:
+                  $ref: "#/components/schemas/v2_transactions.ComplaintCategory"
+                description:
+                  type: string
+              required:
+                - description
+              type: object
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/v2_transactions.Transaction"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                properties:
+                  code:
+                    enum:
+                      - remainder_required
+                      - already_complained
+                      - funds_already_released
+                      - complaint_period_expired
+                      - handover_or_delivery_required
+                    type: string
+                  message:
+                    type: string
+                required:
+                  - code
+                  - message
+                type: object
+      summary: Submit a complaint for this transaction
+      tags:
+        - Transaction Issues
+      x-toc-endpoint:
+        context: p2p_any_user
+        meta:
+          allow_guest_user: true
+          log_req_body: true
+          log_resp_body: true
+          require_active_country: false
+          skip_offline_scope_check: true
+  "/v2/transactions/{transaction_id}/submit_order_issue":
+    post:
+      description: |
+        An order issue is submitted for problems with transactions after payment
+        confirmation and before the order has been shipped or handover has been
+        confirmed. After that a complaint should be submitted instead.
+      operationId: v2_transactions.submitOrderIssueForTransaction
+      parameters:
+        - description: Required in client flows, where you make API calls on behalf of
+            another Trustap user.
+          in: header
+          name: Trustap-User
+          required: false
+          schema:
+            type: string
+        - in: path
+          name: transaction_id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                category:
+                  $ref: "#/components/schemas/v2_transactions.OrderIssueCategory"
+                description:
+                  minLength: 1
+                  type: string
+              required:
+                - description
+              type: object
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/v2_transactions.Transaction"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                properties:
+                  code:
+                    enum:
+                      - remainder_required
+                      - payment_not_accepted
+                      - handover_already_confirmed
+                      - item_already_delivered
+                      - order_issue_already_submitted
+                    type: string
+                  message:
+                    type: string
+                required:
+                  - code
+                  - message
+                type: object
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                properties:
+                  code:
+                    enum:
+                      - not_buyer
+                    type: string
+                  message:
+                    type: string
+                required:
+                  - code
+                  - message
+                type: object
+      summary: Submit an order issue for this transaction
+      tags:
+        - Transaction Issues
+      x-toc-endpoint:
+        context: p2p_any_user
+        meta:
+          allow_guest_user: true
+          log_req_body: false
+          log_resp_body: false
+          require_active_country: false
+          skip_offline_scope_check: true
+  "/v2/transactions/{transaction_id}/track":
+    post:
+      description: |
+        After the tracking information has been submitted then the state
+        of the transaction will be updated asynchronously by Trustap
+        once the delivery of the item has been confirmed, at which point
+        the `delivered` field of the transaction will be set.
+      operationId: v2_transactions.trackTransaction
+      parameters:
+        - description: Required in client flows, where you make API calls on behalf of
+            another Trustap user.
+          in: header
+          name: Trustap-User
+          required: false
+          schema:
+            type: string
+        - in: path
+          name: transaction_id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              example:
+                carrier: ups
+                tracking_code: "***"
+              properties:
+                carrier:
+                  minLength: 1
+                  type: string
+                tracking_code:
+                  minLength: 1
+                  type: string
+              required:
+                - carrier
+                - tracking_code
+              type: object
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/v2_transactions.Transaction"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                properties:
+                  code:
+                    enum:
+                      - invalid_id
+                      - empty_carrier
+                      - empty_tracking_code
+                      - tracking_already_added
+                      - payment_details_not_added
+                      - tracking_details_deadline_expired
+                      - already_cancelled
+                      - tracking_not_supported
+                    type: string
+                  message:
+                    type: string
+                required:
+                  - code
+                  - message
+                type: object
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                properties:
+                  code:
+                    enum:
+                      - not_seller
+                    type: string
+                  message:
+                    type: string
+                required:
+                  - code
+                  - message
+                type: object
+        "409":
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                properties:
+                  code:
+                    enum:
+                      - missing_payment_intent
+                    type: string
+                  message:
+                    type: string
+                required:
+                  - code
+                  - message
+                type: object
+      summary: Set postal tracking details for a transaction
+      tags:
+        - Shipping
+      x-toc-endpoint:
+        context: p2p_any_user
+        meta:
+          allow_guest_user: true
+          log_req_body: true
+          log_resp_body: true
+          require_active_country: false
+          skip_offline_scope_check: true
+security:
+  - APIKey: []
+  - OAuth2: []
+tags:
+  - description: |
+      Users represent users of the platform.
+    name: Buyers and Sellers
+  - description: >
+      Transaction issues endpoints are used for reporting and managing
+      transaction
+
+      issues.
+    name: Transaction Issues
+  - description: |
+      Endpoints for creating and managing transactions.
+    name: Transactions
+  - description: |
+      Payment endpoints for transactions.
+    name: Payment
+  - description: |
+      Endpoint for confirming handover of goods for transactions.
+    name: Handover
+  - description: |
+      Shipping endpoints for transactions.
+    name: Shipping
+x-tagGroups:
+  - name: Users
+    tags:
+      - Buyers and Sellers
+  - name: Payment
+    tags:
+      - Payment
+  - name: Transactions
+    tags:
+      - Transactions
+      - Transaction Issues
+  - name: Delivery
+    tags:
+      - Handover
+      - Shipping
+servers:
+  - url: https://api.test.trustap.com
+components:
+  securitySchemes:
+    APIKey:
+      type: http
+      scheme: basic
+    OAuth2:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: https://sso.trustap.com/auth/realms/trustap-stage/protocol/openid-connect/auth
+          tokenUrl: https://sso.trustap.com/auth/realms/trustap-stage/protocol/openid-connect/token
+          scopes: {}
+  schemas:
+    v2_transactions.BankTransferDetails:
+      properties:
+        processor:
+          type: string
+        stripe:
+          $ref: "#/components/schemas/v2_transactions.StripeBankTransferDetails"
+      required:
+        - processor
+      type: object
+    v2_transactions.Carrier:
+      properties:
+        code:
+          type: string
+        name:
+          type: string
+      required:
+        - code
+        - name
+      type: object
+    v2_transactions.ComplaintCategory:
+      enum:
+        - item_not_received
+        - item_not_as_described
+        - other
+      example: other
+      type: string
+    v2_transactions.Events:
+      properties:
+        by_key:
+          description: |
+            These fields indicate the time that the first instance of the given
+            event occurred. Where events can repeat (such as `refunded`),
+            duplicate instances can be retrieved from the `by_time` sibling
+            property.
+          properties:
+            buyer_handover_confirmed:
+              format: date-time
+              type: string
+            cancelled:
+              format: date-time
+              type: string
+            claimed_by_buyer:
+              format: date-time
+              type: string
+            claimed_by_seller:
+              format: date-time
+              type: string
+            complaint_period_ended:
+              format: date-time
+              type: string
+            complaint_submitted:
+              format: date-time
+              type: string
+            created:
+              format: date-time
+              type: string
+            delivered:
+              format: date-time
+              type: string
+            funds_released:
+              format: date-time
+              type: string
+            joined:
+              format: date-time
+              type: string
+            order_issue_submitted:
+              format: date-time
+              type: string
+            paid:
+              format: date-time
+              type: string
+            payment_accepted:
+              format: date-time
+              type: string
+            refunded:
+              format: date-time
+              type: string
+            rejected:
+              format: date-time
+              type: string
+            review_flagged:
+              format: date-time
+              type: string
+            seller_handover_confirmed:
+              format: date-time
+              type: string
+            tracked:
+              format: date-time
+              type: string
+          required:
+            - created
+          type: object
+        by_time:
+          items:
+            properties:
+              at:
+                format: date-time
+                type: string
+              by:
+                description: |
+                  This contains the ID of the user that triggered this event. It
+                  is not present for events that are triggered by the platform,
+                  such as by automated systems.
+                type: string
+              code:
+                type: string
+            required:
+              - code
+              - at
+            type: object
+          type: array
+      required:
+        - by_time
+        - by_key
+      type: object
+    v2_transactions.Fees:
+      example:
+        buyer: 78
+        config: 1
+        seller: 0
+      properties:
+        buyer:
+          format: int64
+          type: integer
+        config:
+          format: int64
+          type: integer
+        seller:
+          format: int64
+          type: integer
+      required:
+        - buyer
+        - seller
+        - config
+      type: object
+    v2_transactions.OrderIssueCategory:
+      enum:
+        - item_not_received
+        - other
+      example: other
+      type: string
+    v2_transactions.Pricing:
+      properties:
+        amount:
+          format: int64
+          type: integer
+        amount_extra:
+          description: |
+            Represents an additional charge to be paid by the buyer added
+            to the transaction total. Use this field to include costs like
+            processing fees or local taxes.
+            Must be an integer provided in the smallest unit of the currency
+            (for example, 500 for $5.00 USD). Defaults to 0 if not provided.
+          format: int64
+          type: integer
+        amount_postage:
+          description: >
+            Represents an additional charge to be paid by the buyer, seller or
+            client.
+
+            Use this field to include costs like shipping surcharges.
+
+            Must be an integer provided in the smallest unit of the currency
+
+            (for example, 500 for $5.00 USD).
+          format: int64
+          type: integer
+        currency:
+          description: >
+            The currency of the transaction. Note that, at present, the
+
+            buyer must pay using the transaction's currency and the
+
+            seller will be paid in the transaction's currency. Conversion to this
+
+            currency will happen automatically during payment if the buyer pays
+
+            with a different currency.
+          format: currency
+          type: string
+        fees:
+          properties:
+            buyer:
+              format: int64
+              type: integer
+            buyer_client:
+              format: int64
+              type: integer
+            international_payment:
+              format: int64
+              type: integer
+            seller:
+              format: int64
+              type: integer
+            seller_client:
+              format: int64
+              type: integer
+          required:
+            - buyer
+            - seller
+            - buyer_client
+            - seller_client
+          type: object
+        postage_bearer:
+          description: |
+            Indicates who is responsible for paying the postage amount.
+            Only present if `amount_postage` is provided.
+          enum:
+            - buyer
+            - seller
+            - client
+          type: string
+      required:
+        - amount
+        - amount_extra
+        - currency
+        - fees
+      type: object
+    v2_transactions.ShippingDetails:
+      properties:
+        address:
+          $ref: "#/components/schemas/v2_transactions.ShippingDetailsAddress"
+        name:
+          type: string
+        phone:
+          type: string
+      required:
+        - address
+        - name
+        - phone
+      type: object
+    v2_transactions.ShippingDetailsAddress:
+      properties:
+        city:
+          type: string
+        country:
+          type: string
+        line1:
+          type: string
+        line2:
+          type: string
+        postal_code:
+          type: string
+        state:
+          type: string
+      required:
+        - city
+        - country
+        - line1
+        - line2
+        - state
+        - postal_code
+      type: object
+    v2_transactions.Status:
+      enum:
+        - created
+        - joined
+        - rejected
+        - cancelled
+        - paid
+        - review_flagged
+        - payment_accepted
+        - complaint_submitted
+        - complaint_period_ended
+        - refunded
+        - buyer_handover_confirmed
+        - seller_handover_confirmed
+        - tracked
+        - delivered
+        - funds_released
+        - claimed_by_buyer
+        - claimed_by_seller
+      type: string
+    v2_transactions.StripeAba:
+      properties:
+        account_number:
+          type: string
+        bank_name:
+          type: string
+        routing_number:
+          type: string
+      required:
+        - account_number
+        - bank_name
+        - routing_number
+      type: object
+    v2_transactions.StripeBankTransferDetails:
+      properties:
+        amount:
+          format: int64
+          type: integer
+        currency:
+          type: string
+        financial_address:
+          $ref: "#/components/schemas/v2_transactions.StripeFinancialAddress"
+        hosted_instructions_url:
+          type: string
+        reference:
+          type: string
+      required:
+        - amount
+        - currency
+        - hosted_instructions_url
+        - reference
+        - financial_address
+      type: object
+    v2_transactions.StripeFinancialAddress:
+      properties:
+        aba:
+          $ref: "#/components/schemas/v2_transactions.StripeAba"
+        iban:
+          $ref: "#/components/schemas/v2_transactions.StripeIban"
+        sort_code:
+          $ref: "#/components/schemas/v2_transactions.StripeSortCode"
+        swift:
+          $ref: "#/components/schemas/v2_transactions.StripeSwift"
+      type: object
+    v2_transactions.StripeIban:
+      properties:
+        account_holder_name:
+          type: string
+        bic:
+          type: string
+        country:
+          type: string
+        iban:
+          type: string
+      required:
+        - account_holder_name
+        - bic
+        - country
+        - iban
+      type: object
+    v2_transactions.StripeSortCode:
+      properties:
+        account_holder_name:
+          type: string
+        account_number:
+          type: string
+        sort_code:
+          type: string
+      required:
+        - account_holder_name
+        - account_number
+        - sort_code
+      type: object
+    v2_transactions.StripeSwift:
+      properties:
+        account_number:
+          type: string
+        bank_name:
+          type: string
+        swift_code:
+          type: string
+      required:
+        - account_number
+        - bank_name
+        - swift_code
+      type: object
+    v2_transactions.Tracking:
+      properties:
+        carrier:
+          type: string
+        tracking_code:
+          type: string
+      required:
+        - carrier
+        - tracking_code
+      type: object
+    v2_transactions.Transaction:
+      example:
+        buyer:
+          id: "9097"
+          is_guest: false
+        client_id: "1234"
+        deadlines:
+          complaints: 2019-12-25T15:00:00Z
+        description: Soccer ticket
+        events:
+          by_key:
+            buyer_handover_confirmed: 2019-12-25T16:00:00Z
+            created: 2019-12-25T09:00:00Z
+            funds_released: 2019-12-25T17:00:00Z
+            joined: 2019-12-25T10:00:00Z
+            paid: 2019-12-25T11:00:00Z
+            payment_accepted: 2019-12-25T12:00:00Z
+            seller_handover_confirmed: 2019-12-25T15:00:00Z
+          by_time: []
+        funds_release:
+          refunds: []
+          released_to_seller: false
+        id: tx_2106
+        pricing:
+          amount: 1000
+          amount_extra: 0
+          currency: eur
+          fees:
+            buyer: 110
+            buyer_client: 10
+            international_payment: 20
+            seller: 0
+            seller_client: 5
+        review:
+          approved: true
+          outcome_reason: Not fraudulent.
+        seller:
+          id: "9790"
+          is_guest: false
+        status: funds_released
+      properties:
+        buyer:
+          $ref: "#/components/schemas/v2_transactions.User"
+        cancellation:
+          properties:
+            description:
+              type: string
+          required:
+            - description
+          type: object
+        client_id:
+          type: string
+        complaint:
+          properties:
+            accepted:
+              format: date-time
+              type: string
+            category:
+              $ref: "#/components/schemas/v2_transactions.ComplaintCategory"
+            description:
+              type: string
+          required:
+            - description
+            - category
+          type: object
+        contains_shipping:
+          type: boolean
+        deadlines:
+          description: |
+            This property contains all possible actions that have associated
+            deadlines for completion. Actions with `null` do not have deadlines
+            currently pending.
+          properties:
+            complaints:
+              format: date-time
+              type: string
+              nullable: true
+          type: object
+        description:
+          type: string
+        events:
+          $ref: "#/components/schemas/v2_transactions.Events"
+        funds_release:
+          properties:
+            payout_id:
+              type: string
+            refunds:
+              items:
+                properties:
+                  amount:
+                    format: int64
+                    type: integer
+                  id:
+                    type: string
+                required:
+                  - id
+                  - amount
+                type: object
+              type: array
+            released_to_seller:
+              type: boolean
+          required:
+            - released_to_seller
+            - refunds
+          type: object
+        id:
+          format: type_id
+          type: string
+        join_code:
+          type: string
+        metadata:
+          additionalProperties: true
+          description: Arbitrary key-value string pairs for adding extra information to
+            transactions.
+          type: object
+        order_issue:
+          properties:
+            category:
+              $ref: "#/components/schemas/v2_transactions.OrderIssueCategory"
+            description:
+              type: string
+          required:
+            - description
+            - category
+          type: object
+        payment_link:
+          description: |
+            URL to the actions page where the buyer can pay the deposit.
+          type: string
+        pricing:
+          $ref: "#/components/schemas/v2_transactions.Pricing"
+        review:
+          properties:
+            approved:
+              type: boolean
+            outcome_reason:
+              type: string
+          required:
+            - approved
+            - outcome_reason
+          type: object
+        seller:
+          $ref: "#/components/schemas/v2_transactions.User"
+        status:
+          $ref: "#/components/schemas/v2_transactions.Status"
+        tracking:
+          $ref: "#/components/schemas/v2_transactions.Tracking"
+      required:
+        - id
+        - status
+        - client_id
+        - pricing
+        - deadlines
+        - description
+        - events
+      type: object
+    v2_transactions.User:
+      example:
+        id: "9097"
+        is_guest: false
+      properties:
+        id:
+          type: string
+        is_guest:
+          type: boolean
+      required:
+        - id
+        - is_guest
+      type: object
+    v2_users.TosAcceptance:
+      properties:
+        ip:
+          minLength: 1
+          type: string
+        unix_timestamp:
+          format: int64
+          type: integer
+      required:
+        - unix_timestamp
+        - ip
+      type: object
+    v2_users.User:
+      example:
+        created_at: 2019-12-25T13:00:00Z
+        email: jo@example.com
+        id: 1-feb33a87-3917-4538-9260-127c8a6b5232
+      properties:
+        created_at:
+          format: date-time
+          type: string
+        deleted_at:
+          format: date-time
+          type: string
+        email:
+          type: string
+        id:
+          type: string
+      required:
+        - id
+        - email
+        - created_at
+      type: object

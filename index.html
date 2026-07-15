@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>API Tree Viewer with Highlight Toggle</title>
+  <title>API Tree Viewer</title>
   <script src="https://d3js.org/d3.v7.min.js"></script>
   <style>
     body {
@@ -10,12 +10,33 @@
       margin: 0;
     }
     #controls {
-      padding: 10px;
+      padding: 10px 14px;
       background: #f8f8f8;
       border-bottom: 1px solid #ddd;
       position: sticky;
       top: 0;
       z-index: 10;
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      flex-wrap: wrap;
+    }
+    #controls .legend-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      user-select: none;
+    }
+    #controls .swatch {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+    #controls .title {
+      font-weight: 600;
+      color: #444;
     }
     .node circle {
       fill: #555;
@@ -33,155 +54,159 @@
 </head>
 <body>
   <div id="controls"></div>
-<svg width="100%" height="100%"></svg>
+  <svg width="100%" height="100%"></svg>
+  <script>
+    // Colors for diff statuses. "unchanged" intentionally has no highlight color -
+    // it just renders as normal text/circles.
+    const statusColors = {
+      added: "#2ca02c",
+      removed: "#d62728",
+      modified: "#e6a817"
+    };
+    const toggleableStatuses = ["added", "modified", "removed"];
+    let activeStatuses = new Set(toggleableStatuses);
+    let diffMode = false;
 
-<script>
-  const highlightTerms = ["transactions", "create", "claim", "complain", "cancel", "accept","charge", "bank_transfer"];
-  const color = d3.scaleOrdinal().domain(highlightTerms).range(d3.schemeCategory10);
-  let activeTerms = new Set(highlightTerms);
-  let collapseToList = false;
-  let root, allData = {}; // store both before/after trees
-  let currentView = "before"; // default
+    function statusColor(status) {
+      if (!status || !statusColors[status]) return null;
+      return activeStatuses.has(status) ? statusColors[status] : null;
+    }
 
-  const svg = d3.select("svg");
-  const g = svg.append("g");
+    function renderControls() {
+      const controls = d3.select("#controls");
+      controls.selectAll("*").remove();
 
-  const zoom = d3.zoom().on("zoom", (event) => {
-    g.attr("transform", event.transform);
-  });
-  svg.call(zoom);
+      if (!diffMode) {
+        controls.append("span").attr("class", "title").text("Endpoints");
+        return;
+      }
 
-  function renderControls() {
-    const controls = d3.select("#controls");
+      controls.append("span").attr("class", "title").text("Diff:");
+      controls.selectAll(".legend-item")
+        .data(toggleableStatuses)
+        .join("label")
+        .attr("class", "legend-item")
+        .html(status => `
+          <input type="checkbox" value="${status}" checked>
+          <span class="swatch" style="background:${statusColors[status]}"></span>
+          <span>${status}</span>
+        `)
+        .on("change", function (event, status) {
+          const checked = d3.select(this).select("input").property("checked");
+          if (checked) activeStatuses.add(status);
+          else activeStatuses.delete(status);
+          updateColors();
+        });
 
-    // highlight checkboxes
-    controls.append("div")
-      .selectAll("label")
-      .data(highlightTerms)
-      .join("label")
-      .style("margin-right", "10px")
-      .html(term => `
-        <input type="checkbox" value="${term}" checked> 
-        <span style="color:${color(term)}">${term}</span>
-      `)
-      .on("change", function(event, term) {
-        const checked = d3.select(this).select("input").property("checked");
-        if (checked) activeTerms.add(term);
-        else activeTerms.delete(term);
-        updateHighlights();
-      });
+      controls.append("span")
+        .style("color", "#666")
+        .style("font-size", "12px")
+        .text("(unchanged endpoints are shown in black)");
+    }
 
-    // collapse toggle
-    controls.append("label")
-      .style("margin-left", "20px")
-      .html(`<input type="checkbox" id="collapseToggle"> Collapse to list`)
-      .on("change", function() {
-        collapseToList = d3.select("#collapseToggle").property("checked");
-        render();
-      });
+    // Builds the label for a node: the path segment, plus "[METHOD, METHOD]" if
+    // it's an endpoint. Each method gets its own <tspan> so it can be colored
+    // and struck-through independently.
+    function renderNodeLabel(textSelection, d) {
+      const data = d.data;
+      const nodeStatus = data.status || null;
 
-    // before/after toggle
-    controls.append("label")
-      .style("margin-left", "20px")
-      .html(`
-        <select id="viewToggle">
-          <option value="before">Before</option>
-          <option value="after">After</option>
-        </select>
-      `)
-      .on("change", function() {
-        currentView = d3.select("#viewToggle").property("value");
-        root = d3.hierarchy(allData[currentView]);
-        render();
-      });
-  }
+      textSelection.append("tspan")
+        .attr("data-node-status", nodeStatus || "")
+        .attr("fill", statusColor(nodeStatus) || "black")
+        .text(data.name);
 
-  function highlightColor(name) {
-    const isEndpoint = name.includes("[") && name.includes("]");
-    if (!isEndpoint) return null;
-    for (let term of activeTerms) {
-      if (name.toLowerCase().includes(term.toLowerCase())) {
-        return color(term);
+      if (data.methods && data.methods.length) {
+        textSelection.append("tspan").text(" [");
+        data.methods.forEach((m, i) => {
+          textSelection.append("tspan")
+            .attr("data-method-status", m.status)
+            .attr("fill", statusColor(m.status) || "#333")
+            .style("text-decoration", m.status === "removed" ? "line-through" : null)
+            .text((i > 0 ? ", " : "") + m.method);
+        });
+        textSelection.append("tspan").text("]");
       }
     }
-    return null;
-  }
 
-  function render() {
-  if (!root) return;
+    function nodeCircleColor(d) {
+      return statusColor(d.data.status) || "#555";
+    }
 
-  const dx = 20, dy = 200;
-  const tree = d3.tree().nodeSize([dx, dy]);
-  const diagonal = d3.linkHorizontal().x(d => d.y).y(d => d.x);
+    const svg = d3.select("svg");
+    const g = svg.append("g");
+    const zoom = d3.zoom().on("zoom", (event) => {
+      g.attr("transform", event.transform);
+    });
+    svg.call(zoom);
 
-  const treeData = tree(root);
-  const nodes = treeData.descendants();
-  const links = treeData.links();
+    d3.json("tree.json").then(data => {
+      const root = d3.hierarchy(data);
+      diffMode = root.descendants().some(d => d.data.status);
+      renderControls();
 
-  const height = Math.max(500, nodes.length * dx * 1.5);
-  svg.attr("viewBox", [-dy / 3, -dx, window.innerWidth, height]);
+      const dx = 20;
+      const dy = 260;
+      const tree = d3.tree().nodeSize([dx, dy]);
+      const diagonal = d3.linkHorizontal()
+        .x(d => d.y)
+        .y(d => d.x);
 
-  // ---- LINKS ----
-  const link = g.selectAll("path.link")
-    .data(links, d => d.target.data.name); // key by target name
+      const treeData = tree(root);
+      const nodes = treeData.descendants();
+      const links = treeData.links();
 
-  link.join(
-    enter => enter.append("path")
-      .attr("class", "link")
-      .attr("d", diagonal)
-      .attr("stroke-opacity", 0)
-      .transition().duration(750)
-      .attr("stroke-opacity", 0.6),
-    update => update.transition().duration(750).attr("d", diagonal),
-    exit => exit.transition().duration(750).attr("stroke-opacity", 0).remove()
-  );
+      const height = Math.max(500, nodes.length * dx * 1.5);
+      svg.attr("viewBox", [-dy / 3, -dx, window.innerWidth, height]);
 
-  // ---- NODES ----
-  const node = g.selectAll("g.node")
-    .data(nodes, d => d.data.name); // key by node name
+      g.append("g")
+        .selectAll("path")
+        .data(links)
+        .join("path")
+        .attr("class", "link")
+        .attr("d", diagonal);
 
-  const nodeEnter = node.enter().append("g")
-    .attr("class", "node")
-    .attr("transform", d => `translate(${d.y},${d.x})`)
-    .attr("opacity", 0);
+      const node = g.append("g")
+        .selectAll("g")
+        .data(nodes)
+        .join("g")
+        .attr("class", "node")
+        .attr("transform", d => `translate(${d.y},${d.x})`);
 
-  nodeEnter.append("circle").attr("r", 4);
-  nodeEnter.append("text")
-    .attr("dy", "0.31em")
-    .attr("x", d => d.children ? -8 : 8)
-    .attr("text-anchor", d => d.children ? "end" : "start")
-    .text(d => d.data.name)
-    .attr("fill", d => highlightColor(d.data.name) || "black")
-    .clone(true).lower().attr("stroke", "white");
+      node.append("circle")
+        .attr("r", 4)
+        .attr("fill", nodeCircleColor);
 
-  nodeEnter.transition().duration(750).attr("opacity", 1);
+      const text = node.append("text")
+        .attr("dy", "0.31em")
+        .attr("x", d => d.children ? -8 : 8)
+        .attr("text-anchor", d => d.children ? "end" : "start");
 
-  node.transition().duration(750)
-    .attr("transform", d => `translate(${d.y},${d.x})`);
+      text.each(function (d) {
+        renderNodeLabel(d3.select(this), d);
+      });
 
-  node.exit().transition().duration(750).attr("opacity", 0).remove();
+      // White halo behind the text so it stays readable over links.
+      text.clone(true)
+        .lower()
+        .attr("stroke", "white")
+        .attr("stroke-width", 3);
 
-  window.nodeText = g.selectAll("g.node text");
-}
+      window.allNodes = node;
+    });
 
-
-  function updateHighlights() {
-    if (!window.nodeText) return;
-    window.nodeText.attr("fill", d => highlightColor(d.data.name) || "black");
-  }
-
-  // Load both before and after JSONs
-  Promise.all([
-    d3.json("tree_before.json"),
-    d3.json("tree_after.json")
-  ]).then(([beforeData, afterData]) => {
-    allData.before = beforeData;
-    allData.after = afterData;
-    root = d3.hierarchy(allData.before); // default view
-    renderControls();
-    render();
-  });
-</script>
+    function updateColors() {
+      if (!window.allNodes) return;
+      window.allNodes.select("circle").attr("fill", nodeCircleColor);
+      window.allNodes.selectAll("text").each(function (d) {
+        d3.select(this).selectAll("tspan[data-node-status]")
+          .attr("fill", () => statusColor(d.data.status || null) || "black");
+        d3.select(this).selectAll("tspan[data-method-status]").each(function () {
+          const status = d3.select(this).attr("data-method-status");
+          d3.select(this).attr("fill", statusColor(status) || "#333");
+        });
+      });
+    }
+  </script>
 </body>
 </html>
-
