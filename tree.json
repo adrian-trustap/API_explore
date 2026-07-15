@@ -2,28 +2,63 @@
   "name": "/",
   "children": [
     {
-      "name": "/api",
+      "name": "/batch",
       "children": [
         {
-          "name": "/v1",
+          "name": "/transactions",
+          "methods": [
+            {
+              "method": "GET",
+              "status": "removed"
+            }
+          ],
+          "status": "removed"
+        }
+      ]
+    },
+    {
+      "name": "/carriers",
+      "methods": [
+        {
+          "method": "GET",
+          "status": "added"
+        }
+      ],
+      "status": "added"
+    },
+    {
+      "name": "/charge",
+      "methods": [
+        {
+          "method": "GET",
+          "status": "removed"
+        }
+      ],
+      "status": "removed"
+    },
+    {
+      "name": "/client",
+      "children": [
+        {
+          "name": "/supported_registration_countries",
+          "methods": [
+            {
+              "method": "GET",
+              "status": "removed"
+            }
+          ],
+          "status": "removed"
+        }
+      ]
+    },
+    {
+      "name": "/clients",
+      "children": [
+        {
+          "name": "/{client_id}",
           "children": [
             {
-              "name": "/batch",
-              "children": [
-                {
-                  "name": "/transactions",
-                  "methods": [
-                    {
-                      "method": "GET",
-                      "status": "removed"
-                    }
-                  ],
-                  "status": "removed"
-                }
-              ]
-            },
-            {
-              "name": "/charge",
+              "name": "/timelines",
               "methods": [
                 {
                   "method": "GET",
@@ -31,44 +66,80 @@
                 }
               ],
               "status": "removed"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "/fees",
+      "methods": [
+        {
+          "method": "GET",
+          "status": "added"
+        }
+      ],
+      "status": "added"
+    },
+    {
+      "name": "/guest_users",
+      "methods": [
+        {
+          "method": "POST",
+          "status": "unchanged"
+        }
+      ],
+      "status": "unchanged"
+    },
+    {
+      "name": "/me",
+      "children": [
+        {
+          "name": "/account_session",
+          "methods": [
+            {
+              "method": "GET",
+              "status": "removed"
+            }
+          ],
+          "status": "removed"
+        },
+        {
+          "name": "/balances",
+          "methods": [
+            {
+              "method": "GET",
+              "status": "removed"
+            }
+          ],
+          "status": "removed"
+        },
+        {
+          "name": "/debit_account",
+          "methods": [
+            {
+              "method": "GET",
+              "status": "removed"
             },
             {
-              "name": "/client",
-              "children": [
-                {
-                  "name": "/supported_registration_countries",
-                  "methods": [
-                    {
-                      "method": "GET",
-                      "status": "removed"
-                    }
-                  ],
-                  "status": "removed"
-                }
-              ]
-            },
+              "method": "POST",
+              "status": "removed"
+            }
+          ],
+          "status": "removed"
+        },
+        {
+          "name": "/features",
+          "methods": [
             {
-              "name": "/clients",
-              "children": [
-                {
-                  "name": "/{client_id}",
-                  "children": [
-                    {
-                      "name": "/timelines",
-                      "methods": [
-                        {
-                          "method": "GET",
-                          "status": "removed"
-                        }
-                      ],
-                      "status": "removed"
-                    }
-                  ]
-                }
-              ]
-            },
+              "method": "GET",
+              "status": "removed"
+            }
+          ],
+          "status": "removed",
+          "children": [
             {
-              "name": "/guest_users",
+              "name": "/instant_payouts",
               "methods": [
                 {
                   "method": "POST",
@@ -76,311 +147,55 @@
                 }
               ],
               "status": "removed"
-            },
+            }
+          ]
+        },
+        {
+          "name": "/instant_payout_balance",
+          "methods": [
             {
-              "name": "/me",
+              "method": "GET",
+              "status": "removed"
+            }
+          ],
+          "status": "removed"
+        },
+        {
+          "name": "/notifications",
+          "methods": [
+            {
+              "method": "GET",
+              "status": "removed"
+            }
+          ],
+          "status": "removed"
+        },
+        {
+          "name": "/payout_attempts",
+          "methods": [
+            {
+              "method": "GET",
+              "status": "removed"
+            }
+          ],
+          "status": "removed"
+        },
+        {
+          "name": "/payouts",
+          "methods": [
+            {
+              "method": "GET",
+              "status": "removed"
+            }
+          ],
+          "status": "removed"
+        },
+        {
+          "name": "/personal",
+          "children": [
+            {
+              "name": "/additional_identity_document",
               "children": [
-                {
-                  "name": "/account_session",
-                  "methods": [
-                    {
-                      "method": "GET",
-                      "status": "removed"
-                    }
-                  ],
-                  "status": "removed"
-                },
-                {
-                  "name": "/balances",
-                  "methods": [
-                    {
-                      "method": "GET",
-                      "status": "removed"
-                    }
-                  ],
-                  "status": "removed"
-                },
-                {
-                  "name": "/debit_account",
-                  "methods": [
-                    {
-                      "method": "GET",
-                      "status": "removed"
-                    },
-                    {
-                      "method": "POST",
-                      "status": "removed"
-                    }
-                  ],
-                  "status": "removed"
-                },
-                {
-                  "name": "/features",
-                  "methods": [
-                    {
-                      "method": "GET",
-                      "status": "removed"
-                    }
-                  ],
-                  "status": "removed",
-                  "children": [
-                    {
-                      "name": "/instant_payouts",
-                      "methods": [
-                        {
-                          "method": "POST",
-                          "status": "removed"
-                        }
-                      ],
-                      "status": "removed"
-                    }
-                  ]
-                },
-                {
-                  "name": "/instant_payout_balance",
-                  "methods": [
-                    {
-                      "method": "GET",
-                      "status": "removed"
-                    }
-                  ],
-                  "status": "removed"
-                },
-                {
-                  "name": "/notifications",
-                  "methods": [
-                    {
-                      "method": "GET",
-                      "status": "removed"
-                    }
-                  ],
-                  "status": "removed"
-                },
-                {
-                  "name": "/payout_attempts",
-                  "methods": [
-                    {
-                      "method": "GET",
-                      "status": "removed"
-                    }
-                  ],
-                  "status": "removed"
-                },
-                {
-                  "name": "/payouts",
-                  "methods": [
-                    {
-                      "method": "GET",
-                      "status": "removed"
-                    }
-                  ],
-                  "status": "removed"
-                },
-                {
-                  "name": "/personal",
-                  "children": [
-                    {
-                      "name": "/additional_identity_document",
-                      "children": [
-                        {
-                          "name": "/verification_status",
-                          "methods": [
-                            {
-                              "method": "GET",
-                              "status": "removed"
-                            }
-                          ],
-                          "status": "removed"
-                        }
-                      ]
-                    },
-                    {
-                      "name": "/additional_identity_document_back",
-                      "children": [
-                        {
-                          "name": "/verification_status",
-                          "methods": [
-                            {
-                              "method": "GET",
-                              "status": "removed"
-                            }
-                          ],
-                          "status": "removed"
-                        }
-                      ]
-                    },
-                    {
-                      "name": "/details",
-                      "methods": [
-                        {
-                          "method": "GET",
-                          "status": "removed"
-                        },
-                        {
-                          "method": "PATCH",
-                          "status": "removed"
-                        }
-                      ],
-                      "status": "removed"
-                    },
-                    {
-                      "name": "/identity_document",
-                      "children": [
-                        {
-                          "name": "/verification_status",
-                          "methods": [
-                            {
-                              "method": "GET",
-                              "status": "removed"
-                            }
-                          ],
-                          "status": "removed"
-                        }
-                      ]
-                    },
-                    {
-                      "name": "/identity_document_back",
-                      "children": [
-                        {
-                          "name": "/verification_status",
-                          "methods": [
-                            {
-                              "method": "GET",
-                              "status": "removed"
-                            }
-                          ],
-                          "status": "removed"
-                        }
-                      ]
-                    },
-                    {
-                      "name": "/stripe_publishable_key",
-                      "methods": [
-                        {
-                          "method": "GET",
-                          "status": "removed"
-                        }
-                      ],
-                      "status": "removed"
-                    }
-                  ]
-                },
-                {
-                  "name": "/profile",
-                  "children": [
-                    {
-                      "name": "/payout_status",
-                      "methods": [
-                        {
-                          "method": "GET",
-                          "status": "removed"
-                        }
-                      ],
-                      "status": "removed"
-                    }
-                  ]
-                },
-                {
-                  "name": "/stripe_financial_connections",
-                  "children": [
-                    {
-                      "name": "/add_account",
-                      "methods": [
-                        {
-                          "method": "POST",
-                          "status": "removed"
-                        }
-                      ],
-                      "status": "removed"
-                    },
-                    {
-                      "name": "/ownership",
-                      "methods": [
-                        {
-                          "method": "GET",
-                          "status": "removed"
-                        }
-                      ],
-                      "status": "removed"
-                    },
-                    {
-                      "name": "/prepare_account",
-                      "methods": [
-                        {
-                          "method": "POST",
-                          "status": "removed"
-                        }
-                      ],
-                      "status": "removed"
-                    }
-                  ]
-                },
-                {
-                  "name": "/transactions",
-                  "methods": [
-                    {
-                      "method": "GET",
-                      "status": "removed"
-                    },
-                    {
-                      "method": "POST",
-                      "status": "removed"
-                    }
-                  ],
-                  "status": "removed",
-                  "children": [
-                    {
-                      "name": "/create_and_join",
-                      "methods": [
-                        {
-                          "method": "POST",
-                          "status": "removed"
-                        }
-                      ],
-                      "status": "removed"
-                    },
-                    {
-                      "name": "/create_with_guest_user",
-                      "methods": [
-                        {
-                          "method": "POST",
-                          "status": "removed"
-                        }
-                      ],
-                      "status": "removed"
-                    }
-                  ]
-                },
-                {
-                  "name": "/verification_method",
-                  "methods": [
-                    {
-                      "method": "GET",
-                      "status": "removed"
-                    }
-                  ],
-                  "status": "removed"
-                },
-                {
-                  "name": "/verification_session",
-                  "methods": [
-                    {
-                      "method": "GET",
-                      "status": "removed"
-                    }
-                  ],
-                  "status": "removed"
-                },
-                {
-                  "name": "/verification_session_native",
-                  "methods": [
-                    {
-                      "method": "GET",
-                      "status": "removed"
-                    }
-                  ],
-                  "status": "removed"
-                },
                 {
                   "name": "/verification_status",
                   "methods": [
@@ -394,49 +209,456 @@
               ]
             },
             {
-              "name": "/notifications",
+              "name": "/additional_identity_document_back",
               "children": [
                 {
-                  "name": "/{notification_id}",
+                  "name": "/verification_status",
                   "methods": [
                     {
                       "method": "GET",
                       "status": "removed"
                     }
                   ],
-                  "status": "removed",
-                  "children": [
-                    {
-                      "name": "/mark_as_read",
-                      "methods": [
-                        {
-                          "method": "POST",
-                          "status": "removed"
-                        }
-                      ],
-                      "status": "removed"
-                    }
-                  ]
+                  "status": "removed"
                 }
               ]
             },
             {
-              "name": "/p2p",
+              "name": "/details",
+              "methods": [
+                {
+                  "method": "GET",
+                  "status": "removed"
+                },
+                {
+                  "method": "PATCH",
+                  "status": "removed"
+                }
+              ],
+              "status": "removed"
+            },
+            {
+              "name": "/identity_document",
               "children": [
                 {
-                  "name": "/batch",
-                  "children": [
+                  "name": "/verification_status",
+                  "methods": [
                     {
-                      "name": "/transactions",
-                      "methods": [
-                        {
-                          "method": "GET",
-                          "status": "removed"
-                        }
-                      ],
+                      "method": "GET",
                       "status": "removed"
                     }
-                  ]
+                  ],
+                  "status": "removed"
+                }
+              ]
+            },
+            {
+              "name": "/identity_document_back",
+              "children": [
+                {
+                  "name": "/verification_status",
+                  "methods": [
+                    {
+                      "method": "GET",
+                      "status": "removed"
+                    }
+                  ],
+                  "status": "removed"
+                }
+              ]
+            },
+            {
+              "name": "/stripe_publishable_key",
+              "methods": [
+                {
+                  "method": "GET",
+                  "status": "removed"
+                }
+              ],
+              "status": "removed"
+            }
+          ]
+        },
+        {
+          "name": "/profile",
+          "children": [
+            {
+              "name": "/payout_status",
+              "methods": [
+                {
+                  "method": "GET",
+                  "status": "removed"
+                }
+              ],
+              "status": "removed"
+            }
+          ]
+        },
+        {
+          "name": "/stripe_financial_connections",
+          "children": [
+            {
+              "name": "/add_account",
+              "methods": [
+                {
+                  "method": "POST",
+                  "status": "removed"
+                }
+              ],
+              "status": "removed"
+            },
+            {
+              "name": "/ownership",
+              "methods": [
+                {
+                  "method": "GET",
+                  "status": "removed"
+                }
+              ],
+              "status": "removed"
+            },
+            {
+              "name": "/prepare_account",
+              "methods": [
+                {
+                  "method": "POST",
+                  "status": "removed"
+                }
+              ],
+              "status": "removed"
+            }
+          ]
+        },
+        {
+          "name": "/transactions",
+          "methods": [
+            {
+              "method": "GET",
+              "status": "removed"
+            },
+            {
+              "method": "POST",
+              "status": "removed"
+            }
+          ],
+          "status": "removed",
+          "children": [
+            {
+              "name": "/create_and_join",
+              "methods": [
+                {
+                  "method": "POST",
+                  "status": "removed"
+                }
+              ],
+              "status": "removed"
+            },
+            {
+              "name": "/create_with_guest_user",
+              "methods": [
+                {
+                  "method": "POST",
+                  "status": "removed"
+                }
+              ],
+              "status": "removed"
+            }
+          ]
+        },
+        {
+          "name": "/verification_method",
+          "methods": [
+            {
+              "method": "GET",
+              "status": "removed"
+            }
+          ],
+          "status": "removed"
+        },
+        {
+          "name": "/verification_session",
+          "methods": [
+            {
+              "method": "GET",
+              "status": "removed"
+            }
+          ],
+          "status": "removed"
+        },
+        {
+          "name": "/verification_session_native",
+          "methods": [
+            {
+              "method": "GET",
+              "status": "removed"
+            }
+          ],
+          "status": "removed"
+        },
+        {
+          "name": "/verification_status",
+          "methods": [
+            {
+              "method": "GET",
+              "status": "removed"
+            }
+          ],
+          "status": "removed"
+        }
+      ]
+    },
+    {
+      "name": "/notifications",
+      "children": [
+        {
+          "name": "/{notification_id}",
+          "methods": [
+            {
+              "method": "GET",
+              "status": "removed"
+            }
+          ],
+          "status": "removed",
+          "children": [
+            {
+              "name": "/mark_as_read",
+              "methods": [
+                {
+                  "method": "POST",
+                  "status": "removed"
+                }
+              ],
+              "status": "removed"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "/p2p",
+      "children": [
+        {
+          "name": "/batch",
+          "children": [
+            {
+              "name": "/transactions",
+              "methods": [
+                {
+                  "method": "GET",
+                  "status": "removed"
+                }
+              ],
+              "status": "removed"
+            }
+          ]
+        },
+        {
+          "name": "/charge",
+          "methods": [
+            {
+              "method": "GET",
+              "status": "removed"
+            }
+          ],
+          "status": "removed"
+        },
+        {
+          "name": "/clients",
+          "children": [
+            {
+              "name": "/{client_id}",
+              "children": [
+                {
+                  "name": "/timelines",
+                  "methods": [
+                    {
+                      "method": "GET",
+                      "status": "removed"
+                    }
+                  ],
+                  "status": "removed"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "/listings",
+          "children": [
+            {
+              "name": "/create_with_seller",
+              "methods": [
+                {
+                  "method": "POST",
+                  "status": "removed"
+                }
+              ],
+              "status": "removed"
+            }
+          ]
+        },
+        {
+          "name": "/me",
+          "children": [
+            {
+              "name": "/transactions",
+              "methods": [
+                {
+                  "method": "GET",
+                  "status": "removed"
+                },
+                {
+                  "method": "POST",
+                  "status": "removed"
+                }
+              ],
+              "status": "removed",
+              "children": [
+                {
+                  "name": "/create_and_join",
+                  "methods": [
+                    {
+                      "method": "POST",
+                      "status": "removed"
+                    }
+                  ],
+                  "status": "removed"
+                },
+                {
+                  "name": "/create_with_guest_user",
+                  "methods": [
+                    {
+                      "method": "POST",
+                      "status": "removed"
+                    }
+                  ],
+                  "status": "removed"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "/transactions",
+          "children": [
+            {
+              "name": "/{transactionId}",
+              "children": [
+                {
+                  "name": "/set_price",
+                  "methods": [
+                    {
+                      "method": "POST",
+                      "status": "removed"
+                    }
+                  ],
+                  "status": "removed"
+                },
+                {
+                  "name": "/skip_remainder",
+                  "methods": [
+                    {
+                      "method": "POST",
+                      "status": "removed"
+                    }
+                  ],
+                  "status": "removed"
+                }
+              ]
+            },
+            {
+              "name": "/{transaction_id}",
+              "methods": [
+                {
+                  "method": "GET",
+                  "status": "removed"
+                },
+                {
+                  "method": "PATCH",
+                  "status": "removed"
+                }
+              ],
+              "status": "removed",
+              "children": [
+                {
+                  "name": "/accept_complaint",
+                  "methods": [
+                    {
+                      "method": "POST",
+                      "status": "removed"
+                    }
+                  ],
+                  "status": "removed"
+                },
+                {
+                  "name": "/accept_deposit",
+                  "methods": [
+                    {
+                      "method": "POST",
+                      "status": "removed"
+                    }
+                  ],
+                  "status": "removed"
+                },
+                {
+                  "name": "/accept_deposit_with_guest_seller",
+                  "methods": [
+                    {
+                      "method": "POST",
+                      "status": "removed"
+                    }
+                  ],
+                  "status": "removed"
+                },
+                {
+                  "name": "/bank_transfer_details",
+                  "methods": [
+                    {
+                      "method": "GET",
+                      "status": "removed"
+                    }
+                  ],
+                  "status": "removed"
+                },
+                {
+                  "name": "/billing_details",
+                  "methods": [
+                    {
+                      "method": "GET",
+                      "status": "removed"
+                    }
+                  ],
+                  "status": "removed"
+                },
+                {
+                  "name": "/buyer_details",
+                  "methods": [
+                    {
+                      "method": "GET",
+                      "status": "removed"
+                    }
+                  ],
+                  "status": "removed"
+                },
+                {
+                  "name": "/cancel_with_description",
+                  "methods": [
+                    {
+                      "method": "POST",
+                      "status": "removed"
+                    }
+                  ],
+                  "status": "removed"
+                },
+                {
+                  "name": "/cancel_with_description_with_guest_user",
+                  "methods": [
+                    {
+                      "method": "POST",
+                      "status": "removed"
+                    }
+                  ],
+                  "status": "removed"
                 },
                 {
                   "name": "/charge",
@@ -449,442 +671,306 @@
                   "status": "removed"
                 },
                 {
-                  "name": "/clients",
-                  "children": [
+                  "name": "/claim_for_buyer",
+                  "methods": [
                     {
-                      "name": "/{client_id}",
-                      "children": [
-                        {
-                          "name": "/timelines",
-                          "methods": [
-                            {
-                              "method": "GET",
-                              "status": "removed"
-                            }
-                          ],
-                          "status": "removed"
-                        }
-                      ]
-                    }
-                  ]
-                },
-                {
-                  "name": "/listings",
-                  "children": [
-                    {
-                      "name": "/create_with_seller",
-                      "methods": [
-                        {
-                          "method": "POST",
-                          "status": "removed"
-                        }
-                      ],
+                      "method": "POST",
                       "status": "removed"
                     }
-                  ]
+                  ],
+                  "status": "removed"
                 },
                 {
-                  "name": "/me",
-                  "children": [
+                  "name": "/claim_for_seller",
+                  "methods": [
                     {
-                      "name": "/transactions",
-                      "methods": [
-                        {
-                          "method": "GET",
-                          "status": "removed"
-                        },
-                        {
-                          "method": "POST",
-                          "status": "removed"
-                        }
-                      ],
-                      "status": "removed",
-                      "children": [
-                        {
-                          "name": "/create_and_join",
-                          "methods": [
-                            {
-                              "method": "POST",
-                              "status": "removed"
-                            }
-                          ],
-                          "status": "removed"
-                        },
-                        {
-                          "name": "/create_with_guest_user",
-                          "methods": [
-                            {
-                              "method": "POST",
-                              "status": "removed"
-                            }
-                          ],
-                          "status": "removed"
-                        }
-                      ]
+                      "method": "POST",
+                      "status": "removed"
                     }
-                  ]
+                  ],
+                  "status": "removed"
                 },
                 {
-                  "name": "/transactions",
-                  "children": [
+                  "name": "/complain",
+                  "methods": [
                     {
-                      "name": "/{transactionId}",
-                      "children": [
-                        {
-                          "name": "/set_price",
-                          "methods": [
-                            {
-                              "method": "POST",
-                              "status": "removed"
-                            }
-                          ],
-                          "status": "removed"
-                        },
-                        {
-                          "name": "/skip_remainder",
-                          "methods": [
-                            {
-                              "method": "POST",
-                              "status": "removed"
-                            }
-                          ],
-                          "status": "removed"
-                        }
-                      ]
+                      "method": "POST",
+                      "status": "removed"
+                    }
+                  ],
+                  "status": "removed"
+                },
+                {
+                  "name": "/complain_with_guest_buyer",
+                  "methods": [
+                    {
+                      "method": "POST",
+                      "status": "removed"
+                    }
+                  ],
+                  "status": "removed"
+                },
+                {
+                  "name": "/confirm_delivery",
+                  "methods": [
+                    {
+                      "method": "POST",
+                      "status": "removed"
+                    }
+                  ],
+                  "status": "removed"
+                },
+                {
+                  "name": "/confirm_delivery_with_guest_buyer",
+                  "methods": [
+                    {
+                      "method": "POST",
+                      "status": "removed"
+                    }
+                  ],
+                  "status": "removed"
+                },
+                {
+                  "name": "/confirm_handover",
+                  "methods": [
+                    {
+                      "method": "POST",
+                      "status": "removed"
+                    }
+                  ],
+                  "status": "removed"
+                },
+                {
+                  "name": "/confirm_handover_with_guest_user",
+                  "methods": [
+                    {
+                      "method": "POST",
+                      "status": "removed"
+                    }
+                  ],
+                  "status": "removed"
+                },
+                {
+                  "name": "/deposit_stripe_client_secret",
+                  "methods": [
+                    {
+                      "method": "GET",
+                      "status": "removed"
+                    }
+                  ],
+                  "status": "removed"
+                },
+                {
+                  "name": "/end_complaint_period",
+                  "methods": [
+                    {
+                      "method": "POST",
+                      "status": "removed"
+                    }
+                  ],
+                  "status": "removed"
+                },
+                {
+                  "name": "/end_complaint_period_with_guest_buyer",
+                  "methods": [
+                    {
+                      "method": "POST",
+                      "status": "removed"
+                    }
+                  ],
+                  "status": "removed"
+                },
+                {
+                  "name": "/join_with_guest",
+                  "methods": [
+                    {
+                      "method": "POST",
+                      "status": "removed"
+                    }
+                  ],
+                  "status": "removed"
+                },
+                {
+                  "name": "/metadata",
+                  "methods": [
+                    {
+                      "method": "GET",
+                      "status": "removed"
                     },
                     {
-                      "name": "/{transaction_id}",
-                      "methods": [
-                        {
-                          "method": "GET",
-                          "status": "removed"
-                        },
-                        {
-                          "method": "PATCH",
-                          "status": "removed"
-                        }
-                      ],
-                      "status": "removed",
-                      "children": [
-                        {
-                          "name": "/accept_complaint",
-                          "methods": [
-                            {
-                              "method": "POST",
-                              "status": "removed"
-                            }
-                          ],
-                          "status": "removed"
-                        },
-                        {
-                          "name": "/accept_deposit",
-                          "methods": [
-                            {
-                              "method": "POST",
-                              "status": "removed"
-                            }
-                          ],
-                          "status": "removed"
-                        },
-                        {
-                          "name": "/accept_deposit_with_guest_seller",
-                          "methods": [
-                            {
-                              "method": "POST",
-                              "status": "removed"
-                            }
-                          ],
-                          "status": "removed"
-                        },
-                        {
-                          "name": "/bank_transfer_details",
-                          "methods": [
-                            {
-                              "method": "GET",
-                              "status": "removed"
-                            }
-                          ],
-                          "status": "removed"
-                        },
-                        {
-                          "name": "/billing_details",
-                          "methods": [
-                            {
-                              "method": "GET",
-                              "status": "removed"
-                            }
-                          ],
-                          "status": "removed"
-                        },
-                        {
-                          "name": "/buyer_details",
-                          "methods": [
-                            {
-                              "method": "GET",
-                              "status": "removed"
-                            }
-                          ],
-                          "status": "removed"
-                        },
-                        {
-                          "name": "/cancel_with_description",
-                          "methods": [
-                            {
-                              "method": "POST",
-                              "status": "removed"
-                            }
-                          ],
-                          "status": "removed"
-                        },
-                        {
-                          "name": "/cancel_with_description_with_guest_user",
-                          "methods": [
-                            {
-                              "method": "POST",
-                              "status": "removed"
-                            }
-                          ],
-                          "status": "removed"
-                        },
-                        {
-                          "name": "/charge",
-                          "methods": [
-                            {
-                              "method": "GET",
-                              "status": "removed"
-                            }
-                          ],
-                          "status": "removed"
-                        },
-                        {
-                          "name": "/claim_for_buyer",
-                          "methods": [
-                            {
-                              "method": "POST",
-                              "status": "removed"
-                            }
-                          ],
-                          "status": "removed"
-                        },
-                        {
-                          "name": "/claim_for_seller",
-                          "methods": [
-                            {
-                              "method": "POST",
-                              "status": "removed"
-                            }
-                          ],
-                          "status": "removed"
-                        },
-                        {
-                          "name": "/complain",
-                          "methods": [
-                            {
-                              "method": "POST",
-                              "status": "removed"
-                            }
-                          ],
-                          "status": "removed"
-                        },
-                        {
-                          "name": "/complain_with_guest_buyer",
-                          "methods": [
-                            {
-                              "method": "POST",
-                              "status": "removed"
-                            }
-                          ],
-                          "status": "removed"
-                        },
-                        {
-                          "name": "/confirm_delivery",
-                          "methods": [
-                            {
-                              "method": "POST",
-                              "status": "removed"
-                            }
-                          ],
-                          "status": "removed"
-                        },
-                        {
-                          "name": "/confirm_delivery_with_guest_buyer",
-                          "methods": [
-                            {
-                              "method": "POST",
-                              "status": "removed"
-                            }
-                          ],
-                          "status": "removed"
-                        },
-                        {
-                          "name": "/confirm_handover",
-                          "methods": [
-                            {
-                              "method": "POST",
-                              "status": "removed"
-                            }
-                          ],
-                          "status": "removed"
-                        },
-                        {
-                          "name": "/confirm_handover_with_guest_user",
-                          "methods": [
-                            {
-                              "method": "POST",
-                              "status": "removed"
-                            }
-                          ],
-                          "status": "removed"
-                        },
-                        {
-                          "name": "/deposit_stripe_client_secret",
-                          "methods": [
-                            {
-                              "method": "GET",
-                              "status": "removed"
-                            }
-                          ],
-                          "status": "removed"
-                        },
-                        {
-                          "name": "/end_complaint_period",
-                          "methods": [
-                            {
-                              "method": "POST",
-                              "status": "removed"
-                            }
-                          ],
-                          "status": "removed"
-                        },
-                        {
-                          "name": "/end_complaint_period_with_guest_buyer",
-                          "methods": [
-                            {
-                              "method": "POST",
-                              "status": "removed"
-                            }
-                          ],
-                          "status": "removed"
-                        },
-                        {
-                          "name": "/join_with_guest",
-                          "methods": [
-                            {
-                              "method": "POST",
-                              "status": "removed"
-                            }
-                          ],
-                          "status": "removed"
-                        },
-                        {
-                          "name": "/metadata",
-                          "methods": [
-                            {
-                              "method": "GET",
-                              "status": "removed"
-                            },
-                            {
-                              "method": "POST",
-                              "status": "removed"
-                            }
-                          ],
-                          "status": "removed"
-                        },
-                        {
-                          "name": "/seller_details",
-                          "methods": [
-                            {
-                              "method": "GET",
-                              "status": "removed"
-                            }
-                          ],
-                          "status": "removed"
-                        },
-                        {
-                          "name": "/set_deposit_payment_method",
-                          "methods": [
-                            {
-                              "method": "POST",
-                              "status": "removed"
-                            }
-                          ],
-                          "status": "removed"
-                        },
-                        {
-                          "name": "/stripe_publishable_key",
-                          "methods": [
-                            {
-                              "method": "GET",
-                              "status": "removed"
-                            }
-                          ],
-                          "status": "removed"
-                        }
-                      ]
+                      "method": "POST",
+                      "status": "removed"
                     }
-                  ]
+                  ],
+                  "status": "removed"
                 },
                 {
-                  "name": "/transactions_by_claim_secret",
-                  "children": [
+                  "name": "/seller_details",
+                  "methods": [
                     {
-                      "name": "/{secret}",
-                      "children": [
-                        {
-                          "name": "/claim_as_buyer",
-                          "methods": [
-                            {
-                              "method": "POST",
-                              "status": "removed"
-                            }
-                          ],
-                          "status": "removed"
-                        },
-                        {
-                          "name": "/claim_as_seller",
-                          "methods": [
-                            {
-                              "method": "POST",
-                              "status": "removed"
-                            }
-                          ],
-                          "status": "removed"
-                        }
-                      ]
+                      "method": "GET",
+                      "status": "removed"
                     }
-                  ]
+                  ],
+                  "status": "removed"
                 },
                 {
-                  "name": "/transactions_by_join_code",
-                  "children": [
+                  "name": "/set_deposit_payment_method",
+                  "methods": [
                     {
-                      "name": "/{join_code}",
-                      "methods": [
-                        {
-                          "method": "GET",
-                          "status": "removed"
-                        }
-                      ],
-                      "status": "removed",
-                      "children": [
-                        {
-                          "name": "/join",
-                          "methods": [
-                            {
-                              "method": "POST",
-                              "status": "removed"
-                            }
-                          ],
-                          "status": "removed"
-                        }
-                      ]
+                      "method": "POST",
+                      "status": "removed"
                     }
-                  ]
+                  ],
+                  "status": "removed"
+                },
+                {
+                  "name": "/stripe_publishable_key",
+                  "methods": [
+                    {
+                      "method": "GET",
+                      "status": "removed"
+                    }
+                  ],
+                  "status": "removed"
                 }
               ]
+            }
+          ]
+        },
+        {
+          "name": "/transactions_by_claim_secret",
+          "children": [
+            {
+              "name": "/{secret}",
+              "children": [
+                {
+                  "name": "/claim_as_buyer",
+                  "methods": [
+                    {
+                      "method": "POST",
+                      "status": "removed"
+                    }
+                  ],
+                  "status": "removed"
+                },
+                {
+                  "name": "/claim_as_seller",
+                  "methods": [
+                    {
+                      "method": "POST",
+                      "status": "removed"
+                    }
+                  ],
+                  "status": "removed"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "/transactions_by_join_code",
+          "children": [
+            {
+              "name": "/{join_code}",
+              "methods": [
+                {
+                  "method": "GET",
+                  "status": "removed"
+                }
+              ],
+              "status": "removed",
+              "children": [
+                {
+                  "name": "/join",
+                  "methods": [
+                    {
+                      "method": "POST",
+                      "status": "removed"
+                    }
+                  ],
+                  "status": "removed"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "/shippo_shipping_rates",
+      "methods": [
+        {
+          "method": "POST",
+          "status": "removed"
+        }
+      ],
+      "status": "removed"
+    },
+    {
+      "name": "/supported_carriers",
+      "methods": [
+        {
+          "method": "GET",
+          "status": "removed"
+        }
+      ],
+      "status": "removed"
+    },
+    {
+      "name": "/transactions",
+      "methods": [
+        {
+          "method": "GET",
+          "status": "removed"
+        },
+        {
+          "method": "POST",
+          "status": "added"
+        },
+        {
+          "method": "PUT",
+          "status": "removed"
+        }
+      ],
+      "status": "modified",
+      "children": [
+        {
+          "name": "/{transaction_id}",
+          "methods": [
+            {
+              "method": "GET",
+              "status": "unchanged"
             },
             {
-              "name": "/shippo_shipping_rates",
+              "method": "PATCH",
+              "status": "removed"
+            }
+          ],
+          "status": "modified",
+          "children": [
+            {
+              "name": "/accept_complaint",
+              "methods": [
+                {
+                  "method": "POST",
+                  "status": "unchanged"
+                }
+              ],
+              "status": "unchanged"
+            },
+            {
+              "name": "/accept_payment",
+              "methods": [
+                {
+                  "method": "POST",
+                  "status": "unchanged"
+                }
+              ],
+              "status": "unchanged"
+            },
+            {
+              "name": "/accept_payment_with_guest_seller",
               "methods": [
                 {
                   "method": "POST",
@@ -894,7 +980,17 @@
               "status": "removed"
             },
             {
-              "name": "/supported_carriers",
+              "name": "/bank_transfer_details",
+              "methods": [
+                {
+                  "method": "GET",
+                  "status": "unchanged"
+                }
+              ],
+              "status": "unchanged"
+            },
+            {
+              "name": "/billing_details",
               "methods": [
                 {
                   "method": "GET",
@@ -904,583 +1000,348 @@
               "status": "removed"
             },
             {
-              "name": "/transactions",
+              "name": "/buyer_details",
               "methods": [
                 {
                   "method": "GET",
                   "status": "removed"
-                },
+                }
+              ],
+              "status": "removed"
+            },
+            {
+              "name": "/cancel",
+              "methods": [
                 {
-                  "method": "PUT",
+                  "method": "POST",
+                  "status": "unchanged"
+                }
+              ],
+              "status": "unchanged"
+            },
+            {
+              "name": "/cancel_with_guest_user",
+              "methods": [
+                {
+                  "method": "POST",
                   "status": "removed"
                 }
               ],
-              "status": "removed",
-              "children": [
-                {
-                  "name": "/{transaction_id}",
-                  "methods": [
-                    {
-                      "method": "GET",
-                      "status": "removed"
-                    },
-                    {
-                      "method": "PATCH",
-                      "status": "removed"
-                    }
-                  ],
-                  "status": "removed",
-                  "children": [
-                    {
-                      "name": "/accept_complaint",
-                      "methods": [
-                        {
-                          "method": "POST",
-                          "status": "removed"
-                        }
-                      ],
-                      "status": "removed"
-                    },
-                    {
-                      "name": "/accept_payment",
-                      "methods": [
-                        {
-                          "method": "POST",
-                          "status": "removed"
-                        }
-                      ],
-                      "status": "removed"
-                    },
-                    {
-                      "name": "/accept_payment_with_guest_seller",
-                      "methods": [
-                        {
-                          "method": "POST",
-                          "status": "removed"
-                        }
-                      ],
-                      "status": "removed"
-                    },
-                    {
-                      "name": "/bank_transfer_details",
-                      "methods": [
-                        {
-                          "method": "GET",
-                          "status": "removed"
-                        }
-                      ],
-                      "status": "removed"
-                    },
-                    {
-                      "name": "/billing_details",
-                      "methods": [
-                        {
-                          "method": "GET",
-                          "status": "removed"
-                        }
-                      ],
-                      "status": "removed"
-                    },
-                    {
-                      "name": "/buyer_details",
-                      "methods": [
-                        {
-                          "method": "GET",
-                          "status": "removed"
-                        }
-                      ],
-                      "status": "removed"
-                    },
-                    {
-                      "name": "/cancel",
-                      "methods": [
-                        {
-                          "method": "POST",
-                          "status": "removed"
-                        }
-                      ],
-                      "status": "removed"
-                    },
-                    {
-                      "name": "/cancel_with_guest_user",
-                      "methods": [
-                        {
-                          "method": "POST",
-                          "status": "removed"
-                        }
-                      ],
-                      "status": "removed"
-                    },
-                    {
-                      "name": "/charge",
-                      "methods": [
-                        {
-                          "method": "GET",
-                          "status": "removed"
-                        }
-                      ],
-                      "status": "removed"
-                    },
-                    {
-                      "name": "/claim_for_buyer",
-                      "methods": [
-                        {
-                          "method": "POST",
-                          "status": "removed"
-                        }
-                      ],
-                      "status": "removed"
-                    },
-                    {
-                      "name": "/claim_for_seller",
-                      "methods": [
-                        {
-                          "method": "POST",
-                          "status": "removed"
-                        }
-                      ],
-                      "status": "removed"
-                    },
-                    {
-                      "name": "/complain_with_description",
-                      "methods": [
-                        {
-                          "method": "POST",
-                          "status": "removed"
-                        }
-                      ],
-                      "status": "removed"
-                    },
-                    {
-                      "name": "/complain_with_guest_buyer",
-                      "methods": [
-                        {
-                          "method": "POST",
-                          "status": "removed"
-                        }
-                      ],
-                      "status": "removed"
-                    },
-                    {
-                      "name": "/confirm_delivery",
-                      "methods": [
-                        {
-                          "method": "POST",
-                          "status": "removed"
-                        }
-                      ],
-                      "status": "removed"
-                    },
-                    {
-                      "name": "/confirm_delivery_with_guest_buyer",
-                      "methods": [
-                        {
-                          "method": "POST",
-                          "status": "removed"
-                        }
-                      ],
-                      "status": "removed"
-                    },
-                    {
-                      "name": "/end_complaint_period",
-                      "methods": [
-                        {
-                          "method": "POST",
-                          "status": "removed"
-                        }
-                      ],
-                      "status": "removed"
-                    },
-                    {
-                      "name": "/extend_tracking_deadline",
-                      "methods": [
-                        {
-                          "method": "POST",
-                          "status": "removed"
-                        }
-                      ],
-                      "status": "removed"
-                    },
-                    {
-                      "name": "/generate_shipment_label",
-                      "methods": [
-                        {
-                          "method": "POST",
-                          "status": "removed"
-                        }
-                      ],
-                      "status": "removed"
-                    },
-                    {
-                      "name": "/seller_details",
-                      "methods": [
-                        {
-                          "method": "GET",
-                          "status": "removed"
-                        }
-                      ],
-                      "status": "removed"
-                    },
-                    {
-                      "name": "/set_payment_method",
-                      "methods": [
-                        {
-                          "method": "POST",
-                          "status": "removed"
-                        }
-                      ],
-                      "status": "removed"
-                    },
-                    {
-                      "name": "/shipping_details",
-                      "methods": [
-                        {
-                          "method": "GET",
-                          "status": "removed"
-                        },
-                        {
-                          "method": "POST",
-                          "status": "removed"
-                        }
-                      ],
-                      "status": "removed"
-                    },
-                    {
-                      "name": "/shippo_address",
-                      "methods": [
-                        {
-                          "method": "POST",
-                          "status": "removed"
-                        }
-                      ],
-                      "status": "removed"
-                    },
-                    {
-                      "name": "/shippo_customs_declaration",
-                      "methods": [
-                        {
-                          "method": "POST",
-                          "status": "removed"
-                        }
-                      ],
-                      "status": "removed"
-                    },
-                    {
-                      "name": "/shippo_parcel_details",
-                      "methods": [
-                        {
-                          "method": "POST",
-                          "status": "removed"
-                        }
-                      ],
-                      "status": "removed"
-                    },
-                    {
-                      "name": "/shippo_shipping_label",
-                      "methods": [
-                        {
-                          "method": "GET",
-                          "status": "removed"
-                        }
-                      ],
-                      "status": "removed"
-                    },
-                    {
-                      "name": "/shippo_shipping_rate",
-                      "methods": [
-                        {
-                          "method": "POST",
-                          "status": "removed"
-                        }
-                      ],
-                      "status": "removed"
-                    },
-                    {
-                      "name": "/shippo_shipping_rates",
-                      "methods": [
-                        {
-                          "method": "GET",
-                          "status": "removed"
-                        }
-                      ],
-                      "status": "removed"
-                    },
-                    {
-                      "name": "/stripe_client_secret",
-                      "methods": [
-                        {
-                          "method": "GET",
-                          "status": "removed"
-                        }
-                      ],
-                      "status": "removed"
-                    },
-                    {
-                      "name": "/stripe_publishable_key",
-                      "methods": [
-                        {
-                          "method": "GET",
-                          "status": "removed"
-                        }
-                      ],
-                      "status": "removed"
-                    },
-                    {
-                      "name": "/submit_order_issue",
-                      "methods": [
-                        {
-                          "method": "POST",
-                          "status": "removed"
-                        }
-                      ],
-                      "status": "removed"
-                    },
-                    {
-                      "name": "/track",
-                      "methods": [
-                        {
-                          "method": "POST",
-                          "status": "removed"
-                        }
-                      ],
-                      "status": "removed"
-                    },
-                    {
-                      "name": "/track_with_guest_seller",
-                      "methods": [
-                        {
-                          "method": "POST",
-                          "status": "removed"
-                        }
-                      ],
-                      "status": "removed"
-                    }
-                  ]
-                }
-              ]
+              "status": "removed"
             },
             {
-              "name": "/transactions_by_claim_secret",
-              "children": [
+              "name": "/charge",
+              "methods": [
                 {
-                  "name": "/{secret}",
-                  "children": [
-                    {
-                      "name": "/claim_as_buyer",
-                      "methods": [
-                        {
-                          "method": "POST",
-                          "status": "removed"
-                        }
-                      ],
-                      "status": "removed"
-                    },
-                    {
-                      "name": "/claim_as_seller",
-                      "methods": [
-                        {
-                          "method": "POST",
-                          "status": "removed"
-                        }
-                      ],
-                      "status": "removed"
-                    }
-                  ]
+                  "method": "GET",
+                  "status": "removed"
                 }
-              ]
+              ],
+              "status": "removed"
+            },
+            {
+              "name": "/claim",
+              "methods": [
+                {
+                  "method": "POST",
+                  "status": "added"
+                }
+              ],
+              "status": "added"
+            },
+            {
+              "name": "/claim_for_buyer",
+              "methods": [
+                {
+                  "method": "POST",
+                  "status": "removed"
+                }
+              ],
+              "status": "removed"
+            },
+            {
+              "name": "/claim_for_seller",
+              "methods": [
+                {
+                  "method": "POST",
+                  "status": "removed"
+                }
+              ],
+              "status": "removed"
+            },
+            {
+              "name": "/complain_with_description",
+              "methods": [
+                {
+                  "method": "POST",
+                  "status": "removed"
+                }
+              ],
+              "status": "removed"
+            },
+            {
+              "name": "/complain_with_guest_buyer",
+              "methods": [
+                {
+                  "method": "POST",
+                  "status": "removed"
+                }
+              ],
+              "status": "removed"
+            },
+            {
+              "name": "/confirm_delivery",
+              "methods": [
+                {
+                  "method": "POST",
+                  "status": "unchanged"
+                }
+              ],
+              "status": "unchanged"
+            },
+            {
+              "name": "/confirm_delivery_with_guest_buyer",
+              "methods": [
+                {
+                  "method": "POST",
+                  "status": "removed"
+                }
+              ],
+              "status": "removed"
+            },
+            {
+              "name": "/confirm_handover",
+              "methods": [
+                {
+                  "method": "POST",
+                  "status": "added"
+                }
+              ],
+              "status": "added"
+            },
+            {
+              "name": "/end_complaint_period",
+              "methods": [
+                {
+                  "method": "POST",
+                  "status": "unchanged"
+                }
+              ],
+              "status": "unchanged"
+            },
+            {
+              "name": "/extend_tracking_deadline",
+              "methods": [
+                {
+                  "method": "POST",
+                  "status": "removed"
+                }
+              ],
+              "status": "removed"
+            },
+            {
+              "name": "/generate_shipment_label",
+              "methods": [
+                {
+                  "method": "POST",
+                  "status": "removed"
+                }
+              ],
+              "status": "removed"
+            },
+            {
+              "name": "/metadata",
+              "methods": [
+                {
+                  "method": "POST",
+                  "status": "added"
+                }
+              ],
+              "status": "added"
+            },
+            {
+              "name": "/seller_details",
+              "methods": [
+                {
+                  "method": "GET",
+                  "status": "removed"
+                }
+              ],
+              "status": "removed"
+            },
+            {
+              "name": "/set_payment_method",
+              "methods": [
+                {
+                  "method": "POST",
+                  "status": "removed"
+                }
+              ],
+              "status": "removed"
+            },
+            {
+              "name": "/shipping_details",
+              "methods": [
+                {
+                  "method": "GET",
+                  "status": "unchanged"
+                },
+                {
+                  "method": "POST",
+                  "status": "unchanged"
+                }
+              ],
+              "status": "unchanged"
+            },
+            {
+              "name": "/shippo_address",
+              "methods": [
+                {
+                  "method": "POST",
+                  "status": "removed"
+                }
+              ],
+              "status": "removed"
+            },
+            {
+              "name": "/shippo_customs_declaration",
+              "methods": [
+                {
+                  "method": "POST",
+                  "status": "removed"
+                }
+              ],
+              "status": "removed"
+            },
+            {
+              "name": "/shippo_parcel_details",
+              "methods": [
+                {
+                  "method": "POST",
+                  "status": "removed"
+                }
+              ],
+              "status": "removed"
+            },
+            {
+              "name": "/shippo_shipping_label",
+              "methods": [
+                {
+                  "method": "GET",
+                  "status": "removed"
+                }
+              ],
+              "status": "removed"
+            },
+            {
+              "name": "/shippo_shipping_rate",
+              "methods": [
+                {
+                  "method": "POST",
+                  "status": "removed"
+                }
+              ],
+              "status": "removed"
+            },
+            {
+              "name": "/shippo_shipping_rates",
+              "methods": [
+                {
+                  "method": "GET",
+                  "status": "removed"
+                }
+              ],
+              "status": "removed"
+            },
+            {
+              "name": "/stripe_client_secret",
+              "methods": [
+                {
+                  "method": "GET",
+                  "status": "removed"
+                }
+              ],
+              "status": "removed"
+            },
+            {
+              "name": "/stripe_publishable_key",
+              "methods": [
+                {
+                  "method": "GET",
+                  "status": "removed"
+                }
+              ],
+              "status": "removed"
+            },
+            {
+              "name": "/submit_complaint",
+              "methods": [
+                {
+                  "method": "POST",
+                  "status": "added"
+                }
+              ],
+              "status": "added"
+            },
+            {
+              "name": "/submit_order_issue",
+              "methods": [
+                {
+                  "method": "POST",
+                  "status": "unchanged"
+                }
+              ],
+              "status": "unchanged"
+            },
+            {
+              "name": "/track",
+              "methods": [
+                {
+                  "method": "POST",
+                  "status": "unchanged"
+                }
+              ],
+              "status": "unchanged"
+            },
+            {
+              "name": "/track_with_guest_seller",
+              "methods": [
+                {
+                  "method": "POST",
+                  "status": "removed"
+                }
+              ],
+              "status": "removed"
             }
           ]
         }
       ]
     },
     {
-      "name": "/v2",
+      "name": "/transactions_by_claim_secret",
       "children": [
         {
-          "name": "/carriers",
-          "methods": [
-            {
-              "method": "GET",
-              "status": "added"
-            }
-          ],
-          "status": "added"
-        },
-        {
-          "name": "/fees",
-          "methods": [
-            {
-              "method": "GET",
-              "status": "added"
-            }
-          ],
-          "status": "added"
-        },
-        {
-          "name": "/guest_users",
-          "methods": [
-            {
-              "method": "POST",
-              "status": "added"
-            }
-          ],
-          "status": "added"
-        },
-        {
-          "name": "/transactions",
-          "methods": [
-            {
-              "method": "POST",
-              "status": "added"
-            }
-          ],
-          "status": "added",
+          "name": "/{secret}",
           "children": [
             {
-              "name": "/{transaction_id}",
+              "name": "/claim_as_buyer",
               "methods": [
                 {
-                  "method": "GET",
-                  "status": "added"
+                  "method": "POST",
+                  "status": "removed"
                 }
               ],
-              "status": "added",
-              "children": [
+              "status": "removed"
+            },
+            {
+              "name": "/claim_as_seller",
+              "methods": [
                 {
-                  "name": "/accept_complaint",
-                  "methods": [
-                    {
-                      "method": "POST",
-                      "status": "added"
-                    }
-                  ],
-                  "status": "added"
-                },
-                {
-                  "name": "/accept_payment",
-                  "methods": [
-                    {
-                      "method": "POST",
-                      "status": "added"
-                    }
-                  ],
-                  "status": "added"
-                },
-                {
-                  "name": "/bank_transfer_details",
-                  "methods": [
-                    {
-                      "method": "GET",
-                      "status": "added"
-                    }
-                  ],
-                  "status": "added"
-                },
-                {
-                  "name": "/cancel",
-                  "methods": [
-                    {
-                      "method": "POST",
-                      "status": "added"
-                    }
-                  ],
-                  "status": "added"
-                },
-                {
-                  "name": "/claim",
-                  "methods": [
-                    {
-                      "method": "POST",
-                      "status": "added"
-                    }
-                  ],
-                  "status": "added"
-                },
-                {
-                  "name": "/confirm_delivery",
-                  "methods": [
-                    {
-                      "method": "POST",
-                      "status": "added"
-                    }
-                  ],
-                  "status": "added"
-                },
-                {
-                  "name": "/confirm_handover",
-                  "methods": [
-                    {
-                      "method": "POST",
-                      "status": "added"
-                    }
-                  ],
-                  "status": "added"
-                },
-                {
-                  "name": "/end_complaint_period",
-                  "methods": [
-                    {
-                      "method": "POST",
-                      "status": "added"
-                    }
-                  ],
-                  "status": "added"
-                },
-                {
-                  "name": "/metadata",
-                  "methods": [
-                    {
-                      "method": "POST",
-                      "status": "added"
-                    }
-                  ],
-                  "status": "added"
-                },
-                {
-                  "name": "/shipping_details",
-                  "methods": [
-                    {
-                      "method": "GET",
-                      "status": "added"
-                    },
-                    {
-                      "method": "POST",
-                      "status": "added"
-                    }
-                  ],
-                  "status": "added"
-                },
-                {
-                  "name": "/submit_complaint",
-                  "methods": [
-                    {
-                      "method": "POST",
-                      "status": "added"
-                    }
-                  ],
-                  "status": "added"
-                },
-                {
-                  "name": "/submit_order_issue",
-                  "methods": [
-                    {
-                      "method": "POST",
-                      "status": "added"
-                    }
-                  ],
-                  "status": "added"
-                },
-                {
-                  "name": "/track",
-                  "methods": [
-                    {
-                      "method": "POST",
-                      "status": "added"
-                    }
-                  ],
-                  "status": "added"
+                  "method": "POST",
+                  "status": "removed"
                 }
-              ]
+              ],
+              "status": "removed"
             }
           ]
         }

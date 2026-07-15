@@ -22,11 +22,26 @@ The output JSON is consumed by the accompanying HTML viewer.
 """
 import argparse
 import json
+import re
 import sys
 
 import yaml
 
 HTTP_METHODS = {'get', 'post', 'put', 'delete', 'patch', 'options', 'head'}
+VERSION_SEGMENT_RE = re.compile(r'^v\d+(\.\d+)?$', re.IGNORECASE)
+
+
+def strip_version_prefix(parts):
+    """Drop leading path segments that just identify the API version
+    (e.g. "api", "v1", "v2") so equivalent resources from different spec
+    versions line up in the tree instead of living in separate branches.
+    Example: /api/v1/guest_users and /v2/guest_users both become
+    ["guest_users"].
+    """
+    idx = 0
+    while idx < len(parts) and (parts[idx].lower() == 'api' or VERSION_SEGMENT_RE.match(parts[idx])):
+        idx += 1
+    return parts[idx:]
 
 
 class TreeNode:
@@ -55,7 +70,7 @@ def load_spec(path):
         return json.load(f)
 
 
-def build_tree(spec, version, root=None):
+def build_tree(spec, version, root=None, strip_prefix=True):
     """Walk a spec's paths into `root`, tagging methods with `version` (1 or 2)."""
     if root is None:
         root = TreeNode('')
@@ -63,6 +78,8 @@ def build_tree(spec, version, root=None):
         if not isinstance(methods, dict):
             continue
         parts = [p for p in path.strip('/').split('/') if p]
+        if strip_prefix:
+            parts = strip_version_prefix(parts)
         for method in methods.keys():
             if method.lower() in HTTP_METHODS:
                 root.add_path(parts, method, version)
@@ -117,14 +134,18 @@ def main():
     parser.add_argument('--compare', '-c', metavar='SPEC_V2',
                          help='Path to a second spec to diff against `spec`. Enables diff mode.')
     parser.add_argument('--output', '-o', default='tree.json', help='Output JSON path (default: tree.json).')
+    parser.add_argument('--keep-version-prefix', action='store_true',
+                         help="Don't strip leading /api, /v1, /v2, ... segments before comparing paths.")
     args = parser.parse_args()
 
+    strip_prefix = not args.keep_version_prefix
+
     root = TreeNode('')
-    build_tree(load_spec(args.spec), 1, root)
+    build_tree(load_spec(args.spec), 1, root, strip_prefix=strip_prefix)
 
     diff_mode = bool(args.compare)
     if diff_mode:
-        build_tree(load_spec(args.compare), 2, root)
+        build_tree(load_spec(args.compare), 2, root, strip_prefix=strip_prefix)
 
     tree_json = to_d3_json(root, diff_mode)
 
