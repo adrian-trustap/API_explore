@@ -2,20 +2,18 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>API Tree Viewer</title>
+  <title>API Tree Viewer - Split</title>
   <script src="https://d3js.org/d3.v7.min.js"></script>
   <style>
-    body {
+    html, body {
       font-family: sans-serif;
       margin: 0;
+      height: 100%;
     }
     #controls {
       padding: 10px 14px;
       background: #f8f8f8;
       border-bottom: 1px solid #ddd;
-      position: sticky;
-      top: 0;
-      z-index: 10;
       display: flex;
       align-items: center;
       gap: 18px;
@@ -38,8 +36,35 @@
       font-weight: 600;
       color: #444;
     }
-    .node circle {
-      fill: #555;
+    #panes {
+      display: flex;
+      height: calc(100vh - 45px);
+    }
+    .pane {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+    }
+    .pane svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+    .pane-title {
+      position: absolute;
+      top: 8px;
+      left: 12px;
+      font-weight: 600;
+      color: #444;
+      background: rgba(255, 255, 255, 0.85);
+      padding: 2px 10px;
+      border-radius: 4px;
+      z-index: 5;
+      font-size: 13px;
+    }
+    .pane-divider {
+      width: 1px;
+      background: #ddd;
     }
     .node text {
       font-size: 12px;
@@ -54,10 +79,20 @@
 </head>
 <body>
   <div id="controls"></div>
-  <svg width="100%" height="100%"></svg>
+  <div id="panes">
+    <div class="pane" id="pane-v1">
+      <div class="pane-title">v1</div>
+      <svg id="svg-v1"></svg>
+    </div>
+    <div class="pane-divider"></div>
+    <div class="pane" id="pane-v2">
+      <div class="pane-title">v2</div>
+      <svg id="svg-v2"></svg>
+    </div>
+  </div>
+
   <script>
-    // Colors for diff statuses. "unchanged" intentionally has no highlight color -
-    // it just renders as normal text/circles.
+    // Same color scheme as the merged viewer.
     const statusColors = {
       added: "#2ca02c",
       removed: "#d62728",
@@ -65,7 +100,6 @@
     };
     const toggleableStatuses = ["added", "modified", "removed"];
     let activeStatuses = new Set(toggleableStatuses);
-    let diffMode = false;
 
     function statusColor(status) {
       if (!status || !statusColors[status]) return null;
@@ -75,12 +109,6 @@
     function renderControls() {
       const controls = d3.select("#controls");
       controls.selectAll("*").remove();
-
-      if (!diffMode) {
-        controls.append("span").attr("class", "title").text("Endpoints");
-        return;
-      }
-
       controls.append("span").attr("class", "title").text("Diff:");
       controls.selectAll(".legend-item")
         .data(toggleableStatuses)
@@ -97,16 +125,47 @@
           else activeStatuses.delete(status);
           updateColors();
         });
-
       controls.append("span")
         .style("color", "#666")
         .style("font-size", "12px")
-        .text("(unchanged endpoints are shown in black)");
+        .text("(left = v1 only, right = v2 only; amber = endpoint exists in both but its methods changed)");
     }
 
-    // Builds the label for a node: the path segment, plus "[METHOD, METHOD]" if
-    // it's an endpoint. Each method gets its own <tspan> so it can be colored
-    // and struck-through independently.
+    // --- Split the merged tree into a v1-only and a v2-only tree ---------
+    // `side` is "v1" or "v2". A method is kept on a side unless it was
+    // exclusively added (skip on v1) or exclusively removed (skip on v2).
+    // A node that had methods in the merged tree but none survive the
+    // filter (and has no surviving children) didn't exist on that side at
+    // all, so it's dropped entirely.
+    function pruneForSide(node, side, isRoot) {
+      const hadMethods = !!(node.methods && node.methods.length);
+      const methods = hadMethods
+        ? node.methods.filter(m => side === "v1" ? m.status !== "added" : m.status !== "removed")
+        : null;
+
+      const originalChildren = node.children || [];
+      const children = originalChildren
+        .map(c => pruneForSide(c, side, false))
+        .filter(Boolean);
+
+      const hasMethods = methods && methods.length > 0;
+
+      if (!isRoot && hadMethods && !hasMethods && children.length === 0) {
+        return null; // endpoint didn't exist on this side
+      }
+      if (!isRoot && !hadMethods && originalChildren.length > 0 && children.length === 0) {
+        return null; // folder whose entire contents were exclusive to the other side
+      }
+
+      const result = { name: node.name };
+      if (hasMethods) {
+        result.methods = methods;
+        result.status = node.status; // keep for coloring (added/removed/modified/unchanged)
+      }
+      if (children.length) result.children = children;
+      return result;
+    }
+
     function renderNodeLabel(textSelection, d) {
       const data = d.data;
       const nodeStatus = data.status || null;
@@ -133,20 +192,19 @@
       return statusColor(d.data.status) || "#555";
     }
 
-    const svg = d3.select("svg");
-    const g = svg.append("g");
-    const zoom = d3.zoom().on("zoom", (event) => {
-      g.attr("transform", event.transform);
-    });
-    svg.call(zoom);
+    const paneNodeSelections = {};
 
-    d3.json("tree.json").then(data => {
+    function renderPane(svgId, data) {
+      const svg = d3.select(svgId);
+      const g = svg.append("g");
+      const zoom = d3.zoom().on("zoom", (event) => {
+        g.attr("transform", event.transform);
+      });
+      svg.call(zoom);
+
       const root = d3.hierarchy(data);
-      diffMode = root.descendants().some(d => d.data.status);
-      renderControls();
-
       const dx = 20;
-      const dy = 260;
+      const dy = 220;
       const tree = d3.tree().nodeSize([dx, dy]);
       const diagonal = d3.linkHorizontal()
         .x(d => d.y)
@@ -157,7 +215,7 @@
       const links = treeData.links();
 
       const height = Math.max(500, nodes.length * dx * 1.5);
-      svg.attr("viewBox", [-dy / 3, -dx, window.innerWidth, height]);
+      svg.attr("viewBox", [-dy / 3, -dx, 700, height]);
 
       g.append("g")
         .selectAll("path")
@@ -186,24 +244,41 @@
         renderNodeLabel(d3.select(this), d);
       });
 
-      // White halo behind the text so it stays readable over links.
       text.clone(true)
         .lower()
         .attr("stroke", "white")
         .attr("stroke-width", 3);
 
-      window.allNodes = node;
+      return node;
+    }
+
+    d3.json("tree.json").then(data => {
+      const diffMode = d3.hierarchy(data).descendants().some(d => d.data.status);
+      renderControls();
+      if (!diffMode) {
+        d3.select("#controls").append("span")
+          .style("color", "#b00")
+          .text(" tree.json has no diff data - generate it with `python api_tree.py v1.yaml --compare v2.yaml` to use this split view.");
+      }
+
+      const v1Data = pruneForSide(data, "v1", true);
+      const v2Data = pruneForSide(data, "v2", true);
+
+      paneNodeSelections.v1 = renderPane("#svg-v1", v1Data);
+      paneNodeSelections.v2 = renderPane("#svg-v2", v2Data);
     });
 
     function updateColors() {
-      if (!window.allNodes) return;
-      window.allNodes.select("circle").attr("fill", nodeCircleColor);
-      window.allNodes.selectAll("text").each(function (d) {
-        d3.select(this).selectAll("tspan[data-node-status]")
-          .attr("fill", () => statusColor(d.data.status || null) || "black");
-        d3.select(this).selectAll("tspan[data-method-status]").each(function () {
-          const status = d3.select(this).attr("data-method-status");
-          d3.select(this).attr("fill", statusColor(status) || "#333");
+      Object.values(paneNodeSelections).forEach(node => {
+        if (!node) return;
+        node.select("circle").attr("fill", nodeCircleColor);
+        node.selectAll("text").each(function (d) {
+          d3.select(this).selectAll("tspan[data-node-status]")
+            .attr("fill", () => statusColor(d.data.status || null) || "black");
+          d3.select(this).selectAll("tspan[data-method-status]").each(function () {
+            const status = d3.select(this).attr("data-method-status");
+            d3.select(this).attr("fill", statusColor(status) || "#333");
+          });
         });
       });
     }
